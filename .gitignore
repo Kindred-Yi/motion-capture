@@ -1,0 +1,14 @@
+# Python virtual environment
+.venv/
+
+# Python cache
+__pycache__/
+
+# Output files and media
+*.mkv
+*.mp4
+
+# IDE and OS files
+.vscode/
+.idea/
+*.DS_Store
