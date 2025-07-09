@@ -1,3 +1,72 @@
+V2
+```
+source .venv/Scripts/activate
+```
+
+
+```
+python src/scripts/take_pictures.py --output src/data/frames_test
+```
+
+For each color to depth pair, run the calib_with_image.py below, changing the name each time. It is important to make sure to save in the correct directory name as that is how EyehandCalibration.py finds it
+
+```
+python src/scripts/calib_with_images.py --rgb src/data/frames_test/color/0000_color.png -f src/data/frames_test/calibration_results/ -n extrinsics_0.yml
+```
+
+Use the point cloud visualization to see if good or not. Or else, play around with  MARKER_SEPARATION and MARKER_LENGTH until in the point cloud the red dot is at the right place on the aruco tag
+
+```
+python src/scripts/trans_to_point_cloud.py --rgb src/data/frames_test/color/0000_color.png --depth src/data/frames_test/depth/0000_depth.png  --extrinsic src/data/frames_test/calibration_results/extrinsics_0.yml
+```
+
+Before running the below, make sure that you have your calibration results in a folder called "calibration_results" as well as the optitrack data in a folder called "optitrack" be in the --inputs directory in the next command
+
+
+```
+python src/scripts/EyehandCalibration.py --inputs src/data/frames_test/
+```
+
+
+```
+python src/scripts/combine_point_cloud_optitrack_1_frame.py --rgb src/data/frames_test/combination/color/00000.jpg --depth src/data/frames_test/combination/depth/00000.png -crc src/data/frames_test/hand_eye_calibration_result.yml -o src/data/frames_test/test_recording.csv -c Kinect_cam
+```
+
+
+
+V1
+
+``
+Jeffrey command prompt stuff
+
+cd "Program Files\Azure Kinect SDK v1.4.1\tools"
+``
+
+``
+"k4arecorder.exe"  -c 720p -r 15 -l 5 "%USERPROFILE%\OneDrive\Documents\Peoples and Robots Laboratory Research\motion-capture\output.mkv" # this is what I run in Poweshell to get recording
+``
+
+VSCODE Part now
+
+``
+python3 ./Open3D/examples/python/reconstruction_system/sensors/azure_kinect_mkv_reader.py --input ./output.mkv --output ./Open3D/frames # this is for running the program in my root directory
+``
+
+a)
+``
+python src/scripts/calib_with_images.py --rgb "C:\Users\jeffr\OneDrive\Documents\Peoples and Robots Laboratory Research\motion-capture\Open3D\frames\color\00000.jpg" --depth "C:\Users\jeffr\OneDrive\Documents\Peoples and Robots Laboratory Research\motion-capture\Open3D\frames\depth\00000.png"
+``
+
+b)
+``
+python src/scripts/calib_with_batch_images.py --folder Open3D/frames
+``
+
+``
+python src/scripts/trans_to_point_cloud.py --rgb "C:\Users\jeffr\OneDrive\Documents\Peoples and Robots Laboratory Research\motion-capture\Open3D\frames\color\00000.jpg" --depth "C:\Users\jeffr\OneDrive\Documents\Peoples and Robots Laboratory Research\motion-capture\Open3D\frames\depth\00000.png"
+``
+
+
 # motion-capture
 
 Set up python virtual environment:
