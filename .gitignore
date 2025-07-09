@@ -1,2 +1,19 @@
 # Ignore Python virtual environment
-venv311/
+venv/
+*.mkv
+
+*.pcd
+*.bag
+*.jpg
+*.png
+*.pdf
+*.hdf5
+
+# Python cache
+__pycache__/
+*.pyc
+
+# IDE temporary files
+.vscode/
+.idea/
+
