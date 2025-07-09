@@ -29,3 +29,11 @@ Generate point cloud:
 ```
 python trans_to_point_cloud.py --rgb /workspace/src/Open3D/frames/color/00000.jpg --depth /workspace/src/Open3D/frames/depth/00000.png --output /workspace/src/Open3D/data/output00000.pcd
 ```
+
+Jeffrey testing commands
+
+k4arecorder -c 720p -r 15 -l 5 output.mkv
+
+python ./Open3D/examples/python/reconstruction_system/sensors/azure_kinect_mkv_reader.py --input ./output.mkv --output ./Open3D/frames
+
+python src/scripts/calib_with_images.py --rgb /home/hci-lab/repos/motion-capture/Open3D/frames/color/00100.jpg --depth /home/hci-lab/repos/motion-capture/Open3D/frames/depth/00100.png
