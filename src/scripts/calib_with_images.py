@@ -154,7 +154,7 @@ def main():
     fs_ext.write("rvec", rvec_board)
     fs_ext.write("tvec", tvec_board)
     fs_ext.release()
-    print("✅ Saved to {full_path}")
+    print("✅ Saved to ", full_path)
 
     # # ---------- 7) (Optional) Load depth ----------
     # if args.depth:
