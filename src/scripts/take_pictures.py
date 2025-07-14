@@ -4,7 +4,7 @@ import argparse
 import cv2
 import numpy as np
 import os
-from pyk4a import PyK4A, Config, CalibrationType
+from pyk4a import PyK4A, Config, CalibrationType, ColorControlMode
 
 # --- Define ArUco Board details ---
 ARUCO_DICT_NAME = cv2.aruco.DICT_6X6_250
@@ -12,6 +12,8 @@ BOARD_ROWS = 4
 BOARD_COLS = 6
 MARKER_LENGTH = 0.0354  # meters
 MARKER_SEPARATION = 0.0091  # meters
+
+EXPOSURE = 8310  # microseconds, adjust as needed
 
 aruco_dict = cv2.aruco.getPredefinedDictionary(ARUCO_DICT_NAME)
 board = cv2.aruco.GridBoard((BOARD_COLS, BOARD_ROWS), MARKER_LENGTH, MARKER_SEPARATION, aruco_dict)
@@ -26,6 +28,8 @@ def main():
         required=True,
         help="Path to the folder where images will be saved."
     )
+
+    
     args = parser.parse_args()
 
     # --- Create output directories ---
@@ -37,8 +41,11 @@ def main():
 
     # --- Initialize Camera and get intrinsics ---
     k4a = PyK4A(Config())
+
     k4a.start()
-    
+
+    k4a.exposure = EXPOSURE  # Set exposure time
+
     # Save camera intrinsics for the second script
     camera_matrix = k4a.calibration.get_camera_matrix(CalibrationType.COLOR)
     dist_coeffs = k4a.calibration.get_distortion_coefficients(CalibrationType.COLOR)[:5]

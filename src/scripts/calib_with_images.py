@@ -4,7 +4,7 @@ import argparse
 import cv2
 import numpy as np
 import os
-from pyk4a import PyK4A, Config, CalibrationType
+from pyk4a import PyK4A, Config, CalibrationType, K4A_COLOR_CONTROL_MODE_MANUAL
 
 # ---------- 0) Argument parser ----------
 def parse_args():
