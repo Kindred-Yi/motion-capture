@@ -4,7 +4,7 @@ import argparse
 import cv2
 import numpy as np
 import os
-from pyk4a import PyK4A, Config, CalibrationType, K4A_COLOR_CONTROL_MODE_MANUAL
+from pyk4a import PyK4A, Config, CalibrationType
 
 # ---------- 0) Argument parser ----------
 def parse_args():
@@ -67,8 +67,8 @@ def parse_args():
 
 # Trying out differing values
 ARUCO_DICT_NAME   = cv2.aruco.DICT_6X6_250
-MARKER_LENGTH     = 0.0353   # meters
-MARKER_SEPARATION = 0.0091  # meters
+MARKER_LENGTH     = 0.0351   # meters
+MARKER_SEPARATION = 0.0092  # meters
 BOARD_ROWS        = 4
 BOARD_COLS        = 6
 
