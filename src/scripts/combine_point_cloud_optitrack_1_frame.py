@@ -215,6 +215,9 @@ def create_point_cloud(color_raw, depth_raw, camera_intrinsic, dist_coeff): # cu
     """
     Creates a point cloud from RGB and depth images after correcting for lens distortion.
     """
+    color_np = np.asarray(color_raw)
+    depth_np = np.asarray(depth_raw)
+    print(f"Color image shape: {color_np.shape}, Depth image shape: {depth_np.shape}")
 
     # --- Create the RGBD image with the undistorted color image ---
     rgbd_image = o3d.geometry.RGBDImage.create_from_color_and_depth(

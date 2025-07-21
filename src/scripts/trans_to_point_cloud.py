@@ -120,11 +120,11 @@ def main():
         # Draw transformed rigid body as green spehere
         camera_sphere = o3d.geometry.TriangleMesh.create_sphere(radius=0.02)
         camera_sphere.paint_uniform_color([0.0, 1.0, 0.0])  # green
-        camera_sphere.transform(camera_inv_extrinsics)
+        camera_sphere.transform(camera_extrinsics)
 
 
         camera_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.1)
-        camera_frame.transform(camera_inv_extrinsics)
+        camera_frame.transform(camera_extrinsics)
 
         # Coordinate frame for reference
         aruco_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.1)
