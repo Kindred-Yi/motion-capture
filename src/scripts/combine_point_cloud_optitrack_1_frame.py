@@ -211,7 +211,7 @@ def get_all_marker_positions(filepath, frame_number=1):
             
 #     return aruco_geometries
 
-def create_point_cloud(color_raw, depth_raw, camera_intrinsic, dist_coeff):
+def create_point_cloud(color_raw, depth_raw, camera_intrinsic, dist_coeff): # currently hand-eye calculates from rigid body to rgb camera frame. However, point cloud uses the depth camera frame.
     """
     Creates a point cloud from RGB and depth images after correcting for lens distortion.
     """

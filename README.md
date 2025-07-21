@@ -1,4 +1,5 @@
 # Motion Capture ReadMe V2
+## Calibration
 First we want to first get calibration data for the hand eye calibration. Please not that the Command Line arugments needs to be changed, these are just examples
 
 1) First we set up the environment
@@ -22,25 +23,33 @@ Use the point cloud visualization to see if good or not. Or else, play around wi
 ```
 python src/scripts/trans_to_point_cloud.py --rgb src/data/frames_test/color/0000_color.png --depth src/data/frames_test/depth/0000_depth.png  --extrinsic src/data/frames_test/calibration_results/extrinsics_0.yml
 ```
-4) Before running the below, make sure that you have your calibration results in a folder called "calibration_results" as well as the optitrack data in a folder called "optitrack" be in the --inputs directory in the next command. Often, these folders are just put in the same folder as the color and depth folders
+
+## Syncing
+We will first need data, one csv file from optitrack and one mkv file from Kinect
+
+4) Now to extract the mkv file, run the below. This program is written directly from the Azure Kinect SDK. Make sure not folder is called your output folder. If there is an existing named the same, it will just do the visualization, but not actually extract the data
+```
+python3 ./Open3D/examples/python/reconstruction_system/sensors/azure_kinect_mkv_reader.py --input ./output.mkv --output ./Open3D/frames # this is for running the program in my root directory
+```
+
+5) Before running the below, make sure that you have your calibration results in a folder called "calibration_results" as well as the optitrack data in a folder called "optitrack" be in the --inputs directory in the next command. Often, these folders are just put in the same folder as the color and depth folders
 
 
 ```
 python src/scripts/EyehandCalibration.py --inputs src/data/frames_test/
 ```
 
-5) Visualize the data for 1 frame through combine_point_cloud_optitrack_1_frame.py. Use -h if unsure of the command line arguments
+6) Visualize the data for 1 frame through combine_point_cloud_optitrack_1_frame.py. Use -h if unsure of the command line arguments
 ```
 python src/scripts/combine_point_cloud_optitrack_1_frame.py --rgb src/data/frames_test/combination/color/00000.jpg --depth src/data/frames_test/combination/depth/00000.png -crc src/data/frames_calibration2/hand_eye_calibration_result.yml -o src/data/frames_test/test_recording.csv -c Kinect_cam
 ```
 
-6) Run the kinect_optitrack_syncer.py program. This has no command line arguments. Instead, you have to change the global variables in this
+7) Run the kinect_optitrack_syncer.py program. This has no command line arguments. Instead, you have to change the global variables in this
 ```
 python src/scripts/kinect_optitrack_syncer.py
 ```
 
-
-7) Code not finished yet due to need for testing in Calibration. However, general code is already there. All that is left to do is to make sure every kinect frame has 4 optitrack frames as well as read the json file from kinect_optitrack_syncer
+8) Code not finished yet due to need for testing in Calibration. However, general code is already there. All that is left to do is to make sure every kinect frame has 4 optitrack frames as well as read the json file from kinect_optitrack_syncer
 ```
 python src/scripts/combine_point_cloud_optitrack_sequence.py -c "D:\HAND_Human_Human_Study\Kinect\mkv_2_colordepth\7-15 4pm 1\color" -d "D:\HAND_Human_Human_Study\Kinect\mkv_2_colordepth\7-15 4pm 1\depth" -o "D:\HAND_Human_Human_Study\OptiTrack\peanut butter 7-15 4 1.csv" -crc src/data/frames_calibration2/hand_eye_calibration_result.yml --cam_body_name Kinect_cam --intrinsic azure_kinect_intrinsics.yml
 ```

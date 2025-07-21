@@ -7,7 +7,7 @@ import json
 
 # TODO Must change all the below to appropriate values
 KINECT_START = r"D:/HAND_Human_Human_Study/Kinect/start_time_16am_3_710.txt"
-KINECT_OFFSET = 200388                                                         # must change to correct OFFSET
+KINECT_OFFSET = 200388                                                         # must change to correct OFFSET, use k4aviewer to find this
 KINECT_VIDEO = r"D:/HAND_Human_Human_Study/Kinect/output_16am_3_710.mkv"
 KINECT_CUT_END_FRAMES = 20  # number of frames to cut at the end of the video, this is to remove the last few frames that are not needed
 OPTI_CSV = r"D:/HAND_Human_Human_Study/OptiTrack/peanut butter 4pm 7-10 3.csv"
