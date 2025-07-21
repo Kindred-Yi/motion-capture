@@ -11,6 +11,7 @@ from parser import RigidBody, extract_rigid_body_data
 from mocap_classes import Marker, extract_marker_data
 
 ARUCO_1x1_size = 0.0353  # meters, size of the ArUco marker in meters
+OPTI_SCALE = -2  # OptiTrack scale factor when messed up calibration, usually should be 1
 
 
 def load_azure_kinect_intrinsics(intrinsic_file="azure_kinect_intrinsics.yml"):
@@ -82,7 +83,7 @@ def get_all_rigid_body_poses(mocap_data, frame_number):
             continue
         T_world_rigid = np.eye(4)
         T_world_rigid[:3, :3] = quaternion_to_rotation_matrix(rotation_q)
-        T_world_rigid[:3, 3] = [position['x'], position['y'], position['z']]
+        T_world_rigid[:3, 3] = [position['x'] / OPTI_SCALE, position['y'] / OPTI_SCALE, position['z'] / OPTI_SCALE]
         all_poses[name] = T_world_rigid
     return all_poses
 
@@ -93,36 +94,36 @@ def get_all_marker_positions(marker_data, frame_number):
         position = marker.get_position_at_frame(frame_number)
         if position is None or any(v is None for v in position.values()):
             continue
-        all_positions[name] = np.array([position['x'], position['y'], position['z']])
+        all_positions[name] = np.array([position['x'] / OPTI_SCALE, position['y'] / OPTI_SCALE, position['z'] / OPTI_SCALE])
     return all_positions
 
-def detect_and_estimate_aruco_poses(image, camera_matrix, dist_coeffs, marker_size=0.05):
-    """Detects ArUco markers and estimates their poses."""
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    aruco_dict = aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
-    parameters = aruco.DetectorParameters()
-    corners, ids, _ = aruco.detectMarkers(gray, aruco_dict, parameters=parameters)
-    if ids is not None and len(ids) > 0:
-        rvecs, tvecs, _ = aruco.estimatePoseSingleMarkers(corners, marker_size, camera_matrix, dist_coeffs)
-        return rvecs, tvecs, ids
-    return None, None, None
+# def detect_and_estimate_aruco_poses(image, camera_matrix, dist_coeffs, marker_size=0.05):
+#     """Detects ArUco markers and estimates their poses."""
+#     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+#     aruco_dict = aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
+#     parameters = aruco.DetectorParameters()
+#     corners, ids, _ = aruco.detectMarkers(gray, aruco_dict, parameters=parameters)
+#     if ids is not None and len(ids) > 0:
+#         rvecs, tvecs, _ = aruco.estimatePoseSingleMarkers(corners, marker_size, camera_matrix, dist_coeffs)
+#         return rvecs, tvecs, ids
+#     return None, None, None
 
-def get_aruco_geometries_in_world_frame(color_raw, camera_matrix, dist_coeffs, T_world_cam, marker_size):
-    """Returns a list of Open3D geometries for detected ArUco tags."""
-    aruco_geometries = []
-    color_cv_image = cv2.cvtColor(np.asarray(color_raw), cv2.COLOR_RGB2BGR)
-    rvecs, tvecs, ids = detect_and_estimate_aruco_poses(color_cv_image, camera_matrix, dist_coeffs, marker_size)
-    if ids is not None:
-        for i, _ in enumerate(ids):
-            T_cam_aruco = np.eye(4)
-            R_cam_aruco, _ = cv2.Rodrigues(rvecs[i])
-            T_cam_aruco[:3, :3] = R_cam_aruco
-            T_cam_aruco[:3, 3] = tvecs[i].flatten()
-            T_world_aruco = T_world_cam @ T_cam_aruco
-            aruco_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=marker_size)
-            aruco_frame.transform(T_world_aruco)
-            aruco_geometries.append(aruco_frame)
-    return aruco_geometries
+# def get_aruco_geometries_in_world_frame(color_raw, camera_matrix, dist_coeffs, T_world_cam, marker_size):
+#     """Returns a list of Open3D geometries for detected ArUco tags."""
+#     aruco_geometries = []
+#     color_cv_image = cv2.cvtColor(np.asarray(color_raw), cv2.COLOR_RGB2BGR)
+#     rvecs, tvecs, ids = detect_and_estimate_aruco_poses(color_cv_image, camera_matrix, dist_coeffs, marker_size)
+#     if ids is not None:
+#         for i, _ in enumerate(ids):
+#             T_cam_aruco = np.eye(4)
+#             R_cam_aruco, _ = cv2.Rodrigues(rvecs[i])
+#             T_cam_aruco[:3, :3] = R_cam_aruco
+#             T_cam_aruco[:3, 3] = tvecs[i].flatten()
+#             T_world_aruco = T_world_cam @ T_cam_aruco
+#             aruco_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=marker_size)
+#             aruco_frame.transform(T_world_aruco)
+#             aruco_geometries.append(aruco_frame)
+#     return aruco_geometries
 
 def create_point_cloud(color_raw, depth_raw, camera_intrinsic, dist_coeffs):
     """Creates a point cloud from RGB-D images after correcting for lens distortion."""
@@ -161,8 +162,8 @@ def main():
     
     # --- NEW: Read and sort all image files from folders ---
     try:
-        color_files = sorted([f for f in os.listdir(args.color_folder) if f.endswith(('.jpg'))])
-        depth_files = sorted([f for f in os.listdir(args.depth_folder) if f.endswith(('.png'))])
+        color_files = sorted([f for f in os.listdir(args.color_folder) if f.endswith(('.jpg', '.png'))])
+        depth_files = sorted([f for f in os.listdir(args.depth_folder) if f.endswith(('.jpg', '.png'))])
     except FileNotFoundError as e:
         print(f"❌ Error: Could not find folder: {e.filename}")
         sys.exit(1)
@@ -178,6 +179,7 @@ def main():
     vis = o3d.visualization.Visualizer()
     vis.create_window(window_name="Frame-by-Frame Visualization")
     
+    is_first_frame = True
     try:
         # --- Main Processing Loop ---
         for i in range(num_frames):
@@ -207,12 +209,12 @@ def main():
             pcd_camera_frame = create_point_cloud(color_raw, depth_raw, camera_intrinsic, dist_coeffs_cv)
             pcd_world_frame = pcd_camera_frame.transform(T_world_cam)
             
-            aruco_frames = get_aruco_geometries_in_world_frame(
-                color_raw, camera_matrix_cv, dist_coeffs_cv, T_world_cam, ARUCO_1x1_size)
+            # aruco_frames = get_aruco_geometries_in_world_frame(
+            #     color_raw, camera_matrix_cv, dist_coeffs_cv, T_world_cam, ARUCO_1x1_size)
 
             # 4. Assemble all geometries for visualization
             geometries_to_draw = [pcd_world_frame]
-            geometries_to_draw.extend(aruco_frames)
+            # geometries_to_draw.extend(aruco_frames)
             geometries_to_draw.append(o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.4))
             
             for name, T_world_rigid in all_poses_world.items():
@@ -229,8 +231,9 @@ def main():
             # 5. Update the visualizer window
             vis.clear_geometries()
             for geom in geometries_to_draw:
-                vis.add_geometry(geom, reset_bounding_box=False)
+                vis.add_geometry(geom, reset_bounding_box=is_first_frame)
             
+            is_first_frame = False
             vis.poll_events()
             vis.update_renderer()
             time.sleep(0.05) 

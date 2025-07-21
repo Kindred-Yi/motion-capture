@@ -77,8 +77,7 @@ def create_point_cloud(color_raw, depth_raw, camera_intrinsic, camera_extrinsic)
 
     pcd = o3d.geometry.PointCloud.create_from_rgbd_image(
         rgbd_image,
-        intrinsic=camera_intrinsic,
-        extrinsic=camera_extrinsic
+        intrinsic=camera_intrinsic
         )
 
     return pcd
@@ -111,14 +110,14 @@ def main():
         print(f"Point cloud saved to {args.output}")
         print(f"Point cloud contains {len(pcd.points)} points")
 
-        # Draw original origin as a red sphere
+        # Draw camera_frame
         aruco_sphere = o3d.geometry.TriangleMesh.create_sphere(radius=0.02)
         aruco_sphere.paint_uniform_color([1.0, 0.0, 0.0])  # red
         aruco_sphere.translate([0, 0, 0])  # original origin
 
         print(camera_extrinsics.shape)
         camera_inv_extrinsics = np.linalg.inv(camera_extrinsics)
-        # Draw transformed origin as a green sphere
+        # Draw transformed rigid body as green spehere
         camera_sphere = o3d.geometry.TriangleMesh.create_sphere(radius=0.02)
         camera_sphere.paint_uniform_color([0.0, 1.0, 0.0])  # green
         camera_sphere.transform(camera_inv_extrinsics)
