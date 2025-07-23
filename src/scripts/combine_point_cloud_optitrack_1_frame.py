@@ -211,27 +211,16 @@ def get_all_marker_positions(filepath, frame_number=1):
             
 #     return aruco_geometries
 
-def create_point_cloud(color_raw, depth_raw, camera_intrinsic, dist_coeff): # currently hand-eye calculates from rigid body to rgb camera frame. However, point cloud uses the depth camera frame.
-    """
-    Creates a point cloud from RGB and depth images after correcting for lens distortion.
-    """
-    color_np = np.asarray(color_raw)
-    depth_np = np.asarray(depth_raw)
-    print(f"Color image shape: {color_np.shape}, Depth image shape: {depth_np.shape}")
-
-    # --- Create the RGBD image with the undistorted color image ---
+def create_point_cloud(color_raw, depth_raw, camera_intrinsic, dist_coeffs):
+    """Creates a point cloud from RGB-D images after correcting for lens distortion."""
+    color_cv = np.asarray(color_raw)
+    camera_matrix = camera_intrinsic.intrinsic_matrix
+    undistorted_color_cv = cv2.undistort(color_cv, camera_matrix, dist_coeffs)
+    color_raw_undistorted = o3d.geometry.Image(undistorted_color_cv)
     rgbd_image = o3d.geometry.RGBDImage.create_from_color_and_depth(
-        color_raw,  # Use the corrected color image
-        depth_raw,
-        depth_scale=1000.0,
-        depth_trunc=5.0,
-        convert_rgb_to_intensity=False)
-
-    # --- Create the final point cloud (without the incorrect parameter) ---
-    pcd = o3d.geometry.PointCloud.create_from_rgbd_image(
-        rgbd_image,
-        intrinsic=camera_intrinsic
-    )
+        color_raw_undistorted, depth_raw,
+        depth_scale=1000.0, depth_trunc=5.0, convert_rgb_to_intensity=False)
+    pcd = o3d.geometry.PointCloud.create_from_rgbd_image(rgbd_image, camera_intrinsic)
     return pcd
 
 def main():
@@ -249,10 +238,10 @@ def main():
     try:
         # 1. Load images and intrinsics
         color_raw, depth_raw = read_rgbd_images(args.rgb, args.depth)
-        camera_intrinsic, dist_coeff = load_azure_kinect_intrinsics(color_raw=color_raw, intrinsic_file=args.intrinsic)
+        camera_intrinsic, dist_coeffs = load_azure_kinect_intrinsics(color_raw=color_raw, intrinsic_file=args.intrinsic)
 
         # 2. Create point cloud in the Camera's local coordinate frame
-        pcd_camera_frame = create_point_cloud(color_raw, depth_raw, camera_intrinsic, dist_coeff=dist_coeff)
+        pcd_camera_frame = create_point_cloud(color_raw, depth_raw, camera_intrinsic, dist_coeffs=dist_coeffs)
 
         # 3. Load all rigid body poses from OptiTrack (T_world_rigid)
         all_poses_world = get_all_rigid_body_poses(args.optitrack, frame_number=OPTI_FRAME_NUM)
@@ -269,7 +258,6 @@ def main():
 
         # 5. Load the static transformation from the camera's optical frame to its rigid body frame (T_rigid_cam)
         T_rigid_cam = load_camera_extrinsics(args.camRigidcalib)
-        T_rigid_cam = np.linalg.inv(T_rigid_cam)  # Invert to get T_cam_rigid
         
 
         # 6. Calculate the full transformation from the camera frame to the world frame
