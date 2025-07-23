@@ -11,7 +11,7 @@ from parser import RigidBody, extract_rigid_body_data
 from mocap_classes import Marker, extract_marker_data
 
 ARUCO_1x1_size = 0.0353  # meters, size of the ArUco marker in meters
-OPTI_SCALE = -2  # OptiTrack scale factor when messed up calibration, usually should be 1
+OPTI_SCALE = 1  # OptiTrack scale factor when messed up calibration, usually should be 1
 
 
 def load_azure_kinect_intrinsics(intrinsic_file="azure_kinect_intrinsics.yml"):

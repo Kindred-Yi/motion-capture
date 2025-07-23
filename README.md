@@ -12,10 +12,10 @@ source .venv/Scripts/activate # Any venv will work, just need to set up the envi
 python src/scripts/take_pictures.py --output src/data/frames_test
 ```
 
-3) For each color to depth pair, run the calib_with_image.py below, changing the name each time. It is important to make sure to save in the correct directory name as that is how EyehandCalibration.py finds it
+3) For each color to depth pair, run the calib_with_image.py below, changing the name each time. It is important to make sure to save in the correct directory name as that is how EyehandCalibration.py finds it. 
 
 ```
-python src/scripts/calib_with_images.py --rgb src/data/frames_test/color/0000_color.png -f src/data/frames_test/calibration_results/ -n extrinsics_0.yml
+python src/scripts/calib_with_images.py --rgb src/data/frames_test/color/0000_color.png -f src/data/frames_test/calibration_results/ -n extrinsics_0.yml # Optional, but can add --skip-update-intrinsics if you are not able to connect computer to kinect
 ```
 
 Use the point cloud visualization to see if good or not. Or else, play around with MARKER_SEPARATION and MARKER_LENGTH until in the point cloud the red dot is at the right place on the aruco tag. A good rule of thumb is MARKER_LENGTH changes how far the red dot is to the kinect camera while MARKER_SEPARATION moves the red dot around on that same distance
@@ -32,7 +32,7 @@ We will first need data, one csv file from optitrack and one mkv file from Kinec
 python3 ./Open3D/examples/python/reconstruction_system/sensors/azure_kinect_mkv_reader.py --input ./output.mkv --output ./Open3D/frames # this is for running the program in my root directory
 ```
 
-5) Before running the below, make sure that you have your calibration results in a folder called "calibration_results" as well as the optitrack data in a folder called "optitrack" be in the --inputs directory in the next command. Often, these folders are just put in the same folder as the color and depth folders
+5) (Optional, if already calculated) Before running the below, make sure that you have your calibration results in a folder called "calibration_results" as well as the optitrack data in a folder called "optitrack" be in the --inputs directory in the next command. Often, these folders are just put in the same folder as the color and depth folders
 
 
 ```

@@ -67,8 +67,8 @@ def parse_args():
 
 # Trying out differing values
 ARUCO_DICT_NAME   = cv2.aruco.DICT_6X6_250
-MARKER_LENGTH     = 0.0351   # meters
-MARKER_SEPARATION = 0.0092  # meters
+MARKER_LENGTH     = 0.0357   # meters
+MARKER_SEPARATION = 0.0094  # meters
 BOARD_ROWS        = 4
 BOARD_COLS        = 6
 

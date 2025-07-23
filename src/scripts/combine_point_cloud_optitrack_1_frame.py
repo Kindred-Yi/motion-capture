@@ -269,6 +269,8 @@ def main():
 
         # 5. Load the static transformation from the camera's optical frame to its rigid body frame (T_rigid_cam)
         T_rigid_cam = load_camera_extrinsics(args.camRigidcalib)
+        T_rigid_cam = np.linalg.inv(T_rigid_cam)  # Invert to get T_cam_rigid
+        
 
         # 6. Calculate the full transformation from the camera frame to the world frame
         T_world_cam = T_world_camRigid @ T_rigid_cam
