@@ -1,6 +1,8 @@
 # Python virtual environment
 .venv/
 venv-py310/
+venv/
+Open3D/
 
 # Python cache
 __pycache__/
