@@ -7,7 +7,7 @@ import json
 
 # TODO Must change all the below to appropriate values
 KINECT_START = r"D:/HAND_Human_Human_Study/Kinect/start_time_16am_3_710.txt"
-KINECT_OFFSET = 200388                                                         # must change to correct OFFSET, use k4aviewer to find this
+KINECT_OFFSET = 200388  # must change to correct OFFSET, use k4aviewer to find this
 KINECT_VIDEO = r"D:/HAND_Human_Human_Study/Kinect/output_16am_3_710.mkv"
 KINECT_CUT_END_FRAMES = 20  # number of frames to cut at the end of the video, this is to remove the last few frames that are not needed
 OPTI_CSV = r"D:/HAND_Human_Human_Study/OptiTrack/peanut butter 4pm 7-10 3.csv"
@@ -49,9 +49,48 @@ def compute_start_frame_and_time(target_time: datetime, base_start: datetime, fp
         return floor_frame, time_floor, offset
     return ceil_frame, time_ceil, offset
 
-if __name__ == "__main__":
-    # 1. Load and offset Kinect start time as well as count frames in the video
+def get_kinect_seconds(kinect_video_time_str):
+    try:
+        # 1. Split the string by the colon
+        parts = kinect_video_time_str.split(':')
 
+        # 2. Basic validation: check if there are exactly two parts
+        if len(parts) == 2:
+            minutes_str, seconds_str = parts
+
+            # 3. Convert parts to integers
+            minutes = int(minutes_str)
+            seconds = int(seconds_str)
+
+            # 4. Add more robust validation (optional but recommended)
+            if not (0 <= minutes <= 599 and 0 <= seconds <= 59): # Example range for minutes, max 9:59:59 in 3 digits
+                raise ValueError("Minutes should be 0-599 and seconds 0-59.")
+
+            # 5. Calculate total seconds
+            total_seconds = (minutes * 60) + seconds
+            print(f"Successfully converted '{kinect_video_time_str}' to {total_seconds} seconds.")
+            return total_seconds
+        else:
+            print(f"Error: Invalid time format '{kinect_video_time_str}'. Expected MM:SS.")
+
+    except ValueError as e:
+        print(f"Error converting time string '{kinect_video_time_str}': {e}. Please use MM:SS format.")
+
+if __name__ == "__main__":
+    # 0. Parse command line arugment to convert time to frames
+    parser = argparse.ArgumentParser(description='Gives option to convert kinect video time to kinect and optitrack frames')
+    parser.add_argument(
+        "-k",
+        "--kinect_video_time",
+        dest = 'kinect_video_time',
+        type=str,
+        default=None,
+        help = 'Kinect video time in format MM:SS, e.g. 00:30 for 30 seconds'
+    )
+    args = parser.parse_args()
+
+
+    # 1. Load and offset Kinect start time as well as count frames in the video
     try:
         kinect_start_time = read_timestamp_from_file(KINECT_START)
     except Exception as e:
@@ -159,6 +198,20 @@ if __name__ == "__main__":
     with open(JSON_FILE, 'w') as f:
         json.dump(frame_data, f, indent=4)
     print(f"Frame indices saved to {OUTPUT_FILE}")
+
+    # --- Extracting and converting the time string ---
+
+    kinect_video_time_str = args.kinect_video_time
+    total_seconds = None # Initialize to None in case of no input or error
+
+    if kinect_video_time_str is not None:
+        total_seconds = get_kinect_seconds(kinect_video_time_str)
+
+    else:
+        print("No kinect_video_time provided.")
+
+    print(f"Total seconds in integer variable: {total_seconds}")
+
 
 
 
