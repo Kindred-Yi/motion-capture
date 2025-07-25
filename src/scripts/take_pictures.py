@@ -14,7 +14,7 @@ BOARD_COLS = 6
 MARKER_LENGTH = 0.0354  # meters
 MARKER_SEPARATION = 0.0091  # meters
 
-EXPOSURE = 8310  # microseconds, adjust as needed
+EXPOSURE = 10000  # Default exposure time in microseconds
 
 aruco_dict = cv2.aruco.getPredefinedDictionary(ARUCO_DICT_NAME)
 board = cv2.aruco.GridBoard((BOARD_COLS, BOARD_ROWS), MARKER_LENGTH, MARKER_SEPARATION, aruco_dict)
@@ -29,6 +29,13 @@ def main():
         required=True,
         help="Path to the folder where images will be saved."
     )
+    parser.add_argument(
+        "--exposure",
+        type=int,
+        default=EXPOSURE,
+        help="Camera exposure time in microseconds."
+    )
+     # Add resolution argument
     parser.add_argument(
         "--resolution",
         type=str,
@@ -68,7 +75,7 @@ def main():
 
     k4a.start()
 
-    k4a.exposure = EXPOSURE  # Set exposure time
+    k4a.exposure = args.exposure  # Set exposure time
 
     # Save camera intrinsics for the second script
     camera_matrix = k4a.calibration.get_camera_matrix(CalibrationType.COLOR)
