@@ -6,12 +6,12 @@ import math
 import json
 
 # TODO Must change all the below to appropriate values
-KINECT_START = r"D:/HAND_Human_Human_Study/Kinect/start_time_16am_3_710.txt"
+KINECT_START = r"/media/hci-lab/New Volume/HAND_Human_Human_Study/Kinect/record_start_time_4pm_1_7_15.txt"
 KINECT_OFFSET = 200388  # must change to correct OFFSET, use k4aviewer to find this
-KINECT_VIDEO = r"D:/HAND_Human_Human_Study/Kinect/output_16am_3_710.mkv"
+KINECT_VIDEO = r"/media/hci-lab/New Volume/HAND_Human_Human_Study/Kinect/extracted videos/output_4pm_1_7_15.mkv"
 KINECT_CUT_END_FRAMES = 20  # number of frames to cut at the end of the video, this is to remove the last few frames that are not needed
-OPTI_CSV = r"D:/HAND_Human_Human_Study/OptiTrack/peanut butter 4pm 7-10 3.csv"
-OUTPUT_FILE = r"D:/HAND_Human_Human_Study/Kinect/mkv_2_colordepth/7-10 4pm 3"
+OPTI_CSV = r"/media/hci-lab/New Volume/HAND_Human_Human_Study/OptiTrack/peanut butter 7-15 4 1.csv"
+OUTPUT_FOLDER = r"/media/hci-lab/New Volume/HAND_Human_Human_Study/Kinect/mkv_2_colordepth/7-15 4pm 1"
 
 # The global variables below probably will not change
 OPTI_FPS = 120                  # default number of frames on Optitrack
@@ -68,7 +68,6 @@ def get_kinect_seconds(kinect_video_time_str):
 
             # 5. Calculate total seconds
             total_seconds = (minutes * 60) + seconds
-            print(f"Successfully converted '{kinect_video_time_str}' to {total_seconds} seconds.")
             return total_seconds
         else:
             print(f"Error: Invalid time format '{kinect_video_time_str}'. Expected MM:SS.")
@@ -95,7 +94,7 @@ def compute_frame_num(total_seconds, kinect_start_frame, opti_start_frame):
     kinect_offset_frames = kinect_frame - kinect_start_frame
     opti_frame = opti_start_frame + kinect_offset_frames / KINECT_FPS * OPTI_FPS
 
-    return kinect_frame, opti_frame
+    return kinect_frame, int(opti_frame)
 
 
 
@@ -217,10 +216,10 @@ if __name__ == "__main__":
         "optitrack_start_frame": opti_start_frame,
         "optitrack_end_frame": opti_end_frame
     }
-    JSON_FILE = OUTPUT_FILE + "frame_indices.json"
+    JSON_FILE = OUTPUT_FOLDER + " frame_indices.json"
     with open(JSON_FILE, 'w') as f:
         json.dump(frame_data, f, indent=4)
-    print(f"Frame indices saved to {OUTPUT_FILE}")
+    print(f"Frame indices saved to {JSON_FILE}")
 
     # 10. Calculate frame for given kinect video time
 
@@ -234,7 +233,7 @@ if __name__ == "__main__":
         print("No kinect_video_time provided.")
 
     kinect_frame, opti_frame = compute_frame_num(total_seconds=total_seconds, kinect_start_frame=kinect_start_frame, opti_start_frame=opti_start_frame)
-    print
+    print(f"At Kinect Video Time {kinect_video_time_str}\nKinect Frame: {kinect_frame}, Optitrack Frame: {opti_frame}")
 
 
 
