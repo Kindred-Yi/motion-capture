@@ -33,7 +33,7 @@ def count_frames(video_path):
     cap.release()
     return frame_count
 
-def compute_start_frame_and_time(target_time: datetime, base_start: datetime, fps: float):
+def compute_opti_start_frame_and_time(target_time: datetime, base_start: datetime, fps: float):
     """
     Choose floor or ceil of the frame index that best matches target_time.
     Returns: (frame_idx, matched_time, offset)
@@ -75,6 +75,29 @@ def get_kinect_seconds(kinect_video_time_str):
 
     except ValueError as e:
         print(f"Error converting time string '{kinect_video_time_str}': {e}. Please use MM:SS format.")
+
+def compute_frame_num(total_seconds, kinect_start_frame, opti_start_frame):
+    """
+    given total_seconds into the kinect video as well as the calculated kinect_start_frame and opti_start_frame, 
+    this method will return the kinect and optitrack frames that correspond to it
+    Params:
+        total_seconds : number of kinect seconds into the kinect video
+        kinect_start_frame 
+        opti_start_frame
+    Returns:
+
+    """
+    kinect_frame = round(total_seconds * KINECT_FPS)
+    if kinect_frame < kinect_start_frame:
+        print("The given Kinect Video time is before there are optitrack frames. Please provide a minute and second pair that is greater than", kinect_start_time * KINECT_FPS, "seconds")
+        exit(1)
+
+    kinect_offset_frames = kinect_frame - kinect_start_frame
+    opti_frame = opti_start_frame + kinect_offset_frames / KINECT_FPS * OPTI_FPS
+
+    return kinect_frame, opti_frame
+
+
 
 if __name__ == "__main__":
     # 0. Parse command line arugment to convert time to frames
@@ -146,14 +169,14 @@ if __name__ == "__main__":
     if initial_start_offset.total_seconds() >= 0:
         print("OptiTrack started first logic")
         kinect_start_frame = 0
-        opti_start_frame, new_opti_start_time, final_offset = compute_start_frame_and_time(
+        opti_start_frame, new_opti_start_time, final_offset = compute_opti_start_frame_and_time(
             kinect_start_time, opti_start_time, OPTI_FPS
         )
     else:
         print("Kinect started first logic")
-        new_kinect_start_frame = math.ceil(initial_start_offset.total_seconds() * KINECT_FPS)
-        new_kinect_start_time = new_kinect_start_time + timedelta(seconds=kinect_start_frame / KINECT_FPS)
-        opti_start_frame, new_opti_start_time, final_offset = compute_start_frame_and_time(
+        new_kinect_start_frame = math.ceil(initial_start_offset.total_seconds() * KINECT_FPS) # round up so kinect will always be within the optitrack time
+        new_kinect_start_time = new_kinect_start_time + timedelta(seconds=kinect_start_frame / KINECT_FPS) # adds the time 
+        opti_start_frame, new_opti_start_time, final_offset = compute_opti_start_frame_and_time(
             new_kinect_start_time, opti_start_time, OPTI_FPS
         )
         
@@ -199,7 +222,7 @@ if __name__ == "__main__":
         json.dump(frame_data, f, indent=4)
     print(f"Frame indices saved to {OUTPUT_FILE}")
 
-    # --- Extracting and converting the time string ---
+    # 10. Calculate frame for given kinect video time
 
     kinect_video_time_str = args.kinect_video_time
     total_seconds = None # Initialize to None in case of no input or error
@@ -210,7 +233,9 @@ if __name__ == "__main__":
     else:
         print("No kinect_video_time provided.")
 
-    print(f"Total seconds in integer variable: {total_seconds}")
+    kinect_frame, opti_frame = compute_frame_num(total_seconds=total_seconds, kinect_start_frame=kinect_start_frame, opti_start_frame=opti_start_frame)
+    print
+
 
 
 
