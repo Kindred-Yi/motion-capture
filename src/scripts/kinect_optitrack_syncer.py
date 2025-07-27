@@ -4,27 +4,44 @@ import argparse
 import cv2
 import math
 import json
+import chardet
+import os
 
 # TODO Must change all the below to appropriate values
-KINECT_START = r"/media/hci-lab/New Volume/HAND_Human_Human_Study/Kinect/record_start_time_4pm_1_7_15.txt"
-KINECT_OFFSET = 200388  # must change to correct OFFSET, use k4aviewer to find this
-KINECT_VIDEO = r"/media/hci-lab/New Volume/HAND_Human_Human_Study/Kinect/extracted videos/output_4pm_1_7_15.mkv"
-KINECT_CUT_END_FRAMES = 20  # number of frames to cut at the end of the video, this is to remove the last few frames that are not needed
-OPTI_CSV = r"/media/hci-lab/New Volume/HAND_Human_Human_Study/OptiTrack/peanut butter 7-15 4 1.csv"
-OUTPUT_FOLDER = r"/media/hci-lab/New Volume/HAND_Human_Human_Study/Kinect/mkv_2_colordepth/7-15 4pm 1"
+KINECT_START = r"/media/hci-lab/New Volume/HAND_Human_Human_Study/Kinect/start_time_16am_3_710.txt"
+KINECT_OFFSET = 200600  # must change to correct OFFSET, use k4aviewer to find this
+KINECT_VIDEO = r"/media/hci-lab/New Volume/HAND_Human_Human_Study/Kinect/extracted videos/output_16am_3_710.mkv"
+OPTI_CSV = r"/media/hci-lab/New Volume/HAND_Human_Human_Study/OptiTrack/peanut butter 4pm 7-10 3.csv"
+OUTPUT_FOLDER = r"/media/hci-lab/New Volume/HAND_Human_Human_Study/Kinect/mkv_2_colordepth/7-10 16am 3"
 
 # The global variables below probably will not change
+KINECT_CUT_END_FRAMES = 20  # number of frames to cut at the end of the video, this is to remove the last few frames that are not needed
 OPTI_FPS = 120                  # default number of frames on Optitrack
 KINECT_FPS = 30                 # Current Kinect Script runs at 30 FPS
 
 def read_timestamp_from_file(filepath: str, fmt: str = "%Y-%m-%d %H:%M:%S.%f") -> datetime:
     """
     Reads the first line of a text file and parses it into a datetime.
-    The file should contain a single timestamp string matching `fmt`.
+    Automatically detects encoding using chardet.
+
+    Args:
+        filepath (str): Path to the file containing the timestamp string.
+        fmt (str): Format of the datetime string (default: full timestamp with microseconds)
+
+    Returns:
+        datetime: Parsed datetime object
     """
-    with open(filepath, 'r', encoding='utf-16') as f:
-        line = f.readline().strip()
-    return datetime.strptime(line, fmt)
+    # Detect encoding
+    with open(filepath, 'rb') as f:
+        raw_bytes = f.read()
+        result = chardet.detect(raw_bytes)
+        encoding = result['encoding']
+        if encoding is None:
+            raise ValueError("Could not detect file encoding")
+
+    # Decode and parse
+    decoded_text = raw_bytes.decode(encoding).strip()
+    return datetime.strptime(decoded_text, fmt)
 
 def count_frames(video_path):
     cap = cv2.VideoCapture(video_path)
@@ -216,7 +233,7 @@ if __name__ == "__main__":
         "optitrack_start_frame": opti_start_frame,
         "optitrack_end_frame": opti_end_frame
     }
-    JSON_FILE = OUTPUT_FOLDER + " frame_indices.json"
+    JSON_FILE = os.path.join(OUTPUT_FOLDER, "frame_indices.json")
     with open(JSON_FILE, 'w') as f:
         json.dump(frame_data, f, indent=4)
     print(f"Frame indices saved to {JSON_FILE}")
@@ -228,12 +245,12 @@ if __name__ == "__main__":
 
     if kinect_video_time_str is not None:
         total_seconds = get_kinect_seconds(kinect_video_time_str)
-
+        kinect_frame, opti_frame = compute_frame_num(total_seconds=total_seconds, kinect_start_frame=kinect_start_frame, opti_start_frame=opti_start_frame)
+        print(f"At Kinect Video Time {kinect_video_time_str}\nKinect Frame: {kinect_frame}, Optitrack Frame: {opti_frame}")
     else:
         print("No kinect_video_time provided.")
 
-    kinect_frame, opti_frame = compute_frame_num(total_seconds=total_seconds, kinect_start_frame=kinect_start_frame, opti_start_frame=opti_start_frame)
-    print(f"At Kinect Video Time {kinect_video_time_str}\nKinect Frame: {kinect_frame}, Optitrack Frame: {opti_frame}")
+    
 
 
 

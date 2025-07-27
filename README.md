@@ -7,15 +7,16 @@ First we want to first get calibration data for the hand eye calibration. Please
 source .venv/Scripts/activate # Any venv will work, just need to set up the environment first
 ```
 
-2) Now We are going to take pictures for the calibration. Look at the window pop up and follow directions to take pictures. 
+2) Now We are going to take pictures for the calibration. Look at the window pop up and follow directions to take pictures. The --resolution is optional, but HIGHLY recommend. The program will also create an intrinsics file. Please rename that intrinsics file to the correct resolution
 ```
 python src/scripts/take_pictures.py --output src/data/frames_test --resolution 720p
 ```
 
 3) For each color to depth pair, run the calib_with_image.py below, changing the name each time. It is important to make sure to save in the correct directory name as that is how EyehandCalibration.py finds it. 
+   Optional, but can add --skip-update-intrinsics if you are not able to connect to an Azure Kinect
 
 ```
-python src/scripts/calib_with_images.py --rgb src/data/frames_test/color/0000_color.png -f src/data/frames_test/calibration_results/ -n extrinsics_0.yml # Optional, but can add --skip-update-intrinsics if you are not able to connect computer to kinect
+python src/scripts/calib_with_images.py --rgb src/data/frames_test/color/0000_color.png -f src/data/frames_test/calibration_results/ -n extrinsics_0.yml computer to kinect
 ```
 
 Use the point cloud visualization to see if good or not. Or else, play around with MARKER_SEPARATION and MARKER_LENGTH until in the point cloud the red dot is at the right place on the aruco tag. A good rule of thumb is MARKER_LENGTH changes how far the red dot is to the kinect camera while MARKER_SEPARATION moves the red dot around on that same distance
@@ -24,20 +25,21 @@ Use the point cloud visualization to see if good or not. Or else, play around wi
 python src/scripts/trans_to_point_cloud.py --rgb src/data/frames_test/color/0000_color.png --depth src/data/frames_test/depth/0000_depth.png  --extrinsic src/data/frames_test/calibration_results/extrinsics_0.yml
 ```
 
-## Syncing
-We will first need data, one csv file from optitrack and one mkv file from Kinect
-
-4) Now to extract the mkv file, run the below. This program is written directly from the Azure Kinect SDK. Make sure not folder is called your output folder. If there is an existing named the same, it will just do the visualization, but not actually extract the data
-```
-python3 ./Open3D/examples/python/reconstruction_system/sensors/azure_kinect_mkv_reader.py --input ./output.mkv --output ./Open3D/frames # this is for running the program in my root directory
-```
-
-5) (Optional, if already calculated) Before running the below, make sure that you have your calibration results in a folder called "calibration_results" as well as the optitrack data in a folder called "optitrack" be in the --inputs directory in the next command. Often, these folders are just put in the same folder as the color and depth folders
-
+4) Before running the below, make sure that you have your calibration results in a folder called "calibration_results" as well as the optitrack data in a folder called "optitrack" be in the --inputs directory in the next command. Often, these folders are just put in the same folder as the color and depth folders
 
 ```
 python src/scripts/EyehandCalibration.py --inputs src/data/frames_test/
 ```
+
+## Syncing
+We will first need data, one csv file from optitrack and one mkv file from Kinect
+
+5) Now to extract the mkv file, run the below. This program is written directly from the Azure Kinect SDK. Make sure not folder is called your output folder. If there is an existing named the same, it will just do the visualization, but not actually extract the data
+```
+python3 ./Open3D/examples/python/reconstruction_system/sensors/azure_kinect_mkv_reader.py --input ./output.mkv --output ./Open3D/frames # this is for running the program in my root directory
+```
+
+**Note for both combine_point_cloud_optitrack_1_frame.py, it is the upmost importance to specify which intrinsic you are using as different resolutions have different intrinsics values. To figure out which one to use, please look at one of the color or depth images, right click, and go to properties to see the image resolution**
 
 6) Visualize the data for 1 frame through combine_point_cloud_optitrack_1_frame.py. Use -h if unsure of the command line arguments
 ```
@@ -51,8 +53,9 @@ python src/scripts/kinect_optitrack_syncer.py
 
 8) Code not finished yet due to need for testing in Calibration. However, general code is already there. All that is left to do is to make sure every kinect frame has 4 optitrack frames as well as read the json file from kinect_optitrack_syncer
 ```
-python src/scripts/combine_point_cloud_optitrack_sequence.py -c "D:\HAND_Human_Human_Study\Kinect\mkv_2_colordepth\7-15 4pm 1\color" -d "D:\HAND_Human_Human_Study\Kinect\mkv_2_colordepth\7-15 4pm 1\depth" -o "D:\HAND_Human_Human_Study\OptiTrack\peanut butter 7-15 4 1.csv" -crc src/data/frames_calibration2/hand_eye_calibration_result.yml --cam_body_name Kinect_cam --intrinsic azure_kinect_intrinsics.yml
+python src/scripts/combine_point_cloud_optitrack_sequence.py -c "/media/hci-lab/New Volume/HAND_Human_Human_Study/Kinect/mkv_2_colordepth/7-10 16am 3/color" -d "/media/hci-lab/New Volume/HAND_Human_Human_Study/Kinect/mkv_2_colordepth/7-10 16am 3/depth" -o "/media/hci-lab/New Volume/HAND_Human_Human_Study/OptiTrack/peanut butter 4pm 7-10 3.csv" -crc src/data/frames_calibration2/hand_eye_calibration_result.yml --cam_body_name Kinect_cam --intrinsic azure_kinect_intrinsics_1080.yml -vf "/media/hci-lab/New Volume/HAND_Human_Human_Study/Kinect/mkv_2_colordepth/7-10 16am 3/frame_indices.json"
 ```
+
 
 
 

@@ -6,6 +6,7 @@ import argparse
 import cv2
 import cv2.aruco as aruco
 import time
+import json
 
 from parser import RigidBody, extract_rigid_body_data
 from mocap_classes import Marker, extract_marker_data
@@ -13,6 +14,24 @@ from mocap_classes import Marker, extract_marker_data
 ARUCO_1x1_size = 0.0353  # meters, size of the ArUco marker in meters
 OPTI_SCALE = 1  # OptiTrack scale factor when messed up calibration, usually should be 1
 
+def load_frame_indices(json_path):
+    """
+    Load start/end frame indices from a JSON file.
+
+    Args:
+        json_path (str): Path to the JSON file containing frame indices.
+
+    Returns:
+        dict: A dictionary with keys: 'kinect_start_frame', 'kinect_end_frame',
+              'optitrack_start_frame', and 'optitrack_end_frame'.
+    """
+    if not os.path.exists(json_path):
+        raise FileNotFoundError(f"File not found: {json_path}")
+    
+    with open(json_path, 'r') as f:
+        frame_data = json.load(f)
+    
+    return frame_data
 
 def load_azure_kinect_intrinsics(intrinsic_file="azure_kinect_intrinsics.yml"):
     """Load Azure Kinect intrinsic parameters and distortion coefficients."""
@@ -147,7 +166,7 @@ def main():
     parser.add_argument('--cam_body_name', default='Kinect_cam', help='Name of the rigid body attached to the camera.')
     parser.add_argument('--intrinsic', default='azure_kinect_intrinsics.yml', help='Camera intrinsic parameters file.')
     # MODIFIED: Start frame is now an offset for OptiTrack data, end_frame is removed.
-    parser.add_argument('--start_frame', type=int, default=1, help='The frame number in the OptiTrack data that corresponds to the FIRST image file.')
+    parser.add_argument('-vf', '--video_frames', dest='video_frames', type=str, default=1, help='path to JSON file for start and end frames')
 
     args = parser.parse_args()
 
@@ -169,32 +188,27 @@ def main():
         sys.exit(1)
 
     print(f"✅ Found {len(color_files)} color images and {len(depth_files)} depth images in the specified folders.")
-    num_frames = min(len(color_files), len(depth_files))
-    if num_frames == 0:
-        sys.exit("Error: No image files found in the specified color or depth folders.")
-        
-    print(f"✅ Found {num_frames} image pairs to process.")
 
     # --- Setup Visualizer ---
     vis = o3d.visualization.Visualizer()
     vis.create_window(window_name="Frame-by-Frame Visualization")
     
     is_first_frame = True
+
+    frame_data = load_frame_indices(args.video_frames)
+
     try:
         # --- Main Processing Loop ---
-        for i in range(num_frames):
+        optitrack_frame_num = frame_data["optitrack_start_frame"]
+        optitrack_end_frame = frame_data["optitrack_end_frame"]
+        kinect_frame_num = frame_data["kinect_start_frame"]
+        kinect_end_frame = frame_data["kinect_end_frame"]
+        counter = 0
+        while  optitrack_frame_num < optitrack_end_frame:
             # Calculate the corresponding frame number for OptiTrack data
-            optitrack_frame_num = args.start_frame + i
-            print(f"\n--- Processing Image Index: {i} (OptiTrack Frame: {optitrack_frame_num}) ---")
-            
-            # 1. Construct file paths for the current frame using sorted lists
-            color_path = os.path.join(args.color_folder, color_files[i])
-            depth_path = os.path.join(args.depth_folder, depth_files[i])
+            print(f"(OptiTrack Frame: {optitrack_frame_num}) (Kinect Frame: {kinect_frame_num}) ---\n")
 
-            # 2. Load frame-specific data
-            color_raw, depth_raw = read_rgbd_images(color_path, depth_path)
-            if color_raw is None: continue
-
+            # 1. load optitrack data
             all_poses_world = get_all_rigid_body_poses(mocap_data, optitrack_frame_num)
             all_marker_positions_world = get_all_marker_positions(marker_data, optitrack_frame_num)
 
@@ -202,12 +216,18 @@ def main():
                 print(f"Warning: Camera rigid body '{args.cam_body_name}' not in data for frame {optitrack_frame_num}. Skipping.")
                 continue
 
-            # 3. Perform calculations for the current frame
-            T_world_camRigid = all_poses_world[args.cam_body_name]
-            T_world_cam = T_world_camRigid @ T_rigid_cam
-            
-            pcd_camera_frame = create_point_cloud(color_raw, depth_raw, camera_intrinsic, dist_coeffs_cv)
-            pcd_world_frame = pcd_camera_frame.transform(T_world_cam)
+            if counter % 4 == 0: # checks if need to update pcd
+                color_path = os.path.join(args.color_folder, color_files[kinect_frame_num])
+                depth_path = os.path.join(args.depth_folder, depth_files[kinect_frame_num])
+                # 2. Perform calculations for the current frame
+                T_world_camRigid = all_poses_world[args.cam_body_name]
+                T_world_cam = T_world_camRigid @ T_rigid_cam
+                
+                # 3. check if need to update the point cloud,
+                color_raw, depth_raw = read_rgbd_images(color_path, depth_path)
+                pcd_camera_frame = create_point_cloud(color_raw, depth_raw, camera_intrinsic, dist_coeffs_cv)
+                pcd_world_frame = pcd_camera_frame.transform(T_world_cam)
+                kinect_frame_num += 1
             
             # aruco_frames = get_aruco_geometries_in_world_frame(
             #     color_raw, camera_matrix_cv, dist_coeffs_cv, T_world_cam, ARUCO_1x1_size)
@@ -236,7 +256,8 @@ def main():
             is_first_frame = False
             vis.poll_events()
             vis.update_renderer()
-            time.sleep(0.05) 
+            counter += 1
+            optitrack_frame_num += 1
 
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
