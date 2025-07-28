@@ -13,6 +13,8 @@ from mocap_classes import Marker, extract_marker_data
 
 ARUCO_1x1_size = 0.0353  # meters, size of the ArUco marker in meters
 OPTI_SCALE = 1  # OptiTrack scale factor when messed up calibration, usually should be 1
+OPTI_FPS = 120
+KINECT_FPS = 30
 
 def load_frame_indices(json_path):
     """
@@ -204,6 +206,8 @@ def main():
         kinect_frame_num = frame_data["kinect_start_frame"]
         kinect_end_frame = frame_data["kinect_end_frame"]
         counter = 0
+
+        frame_ratio = OPTI_FPS / KINECT_FPS
         while  optitrack_frame_num < optitrack_end_frame:
             # Calculate the corresponding frame number for OptiTrack data
             print(f"(OptiTrack Frame: {optitrack_frame_num}) (Kinect Frame: {kinect_frame_num}) ---\n")
@@ -216,7 +220,7 @@ def main():
                 print(f"Warning: Camera rigid body '{args.cam_body_name}' not in data for frame {optitrack_frame_num}. Skipping.")
                 continue
 
-            if counter % 4 == 0: # checks if need to update pcd
+            if counter % frame_ratio == 0: # checks if need to update pcd
                 color_path = os.path.join(args.color_folder, color_files[kinect_frame_num])
                 depth_path = os.path.join(args.depth_folder, depth_files[kinect_frame_num])
                 # 2. Perform calculations for the current frame

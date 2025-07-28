@@ -16,6 +16,7 @@ OUTPUT_FOLDER = r"/media/hci-lab/New Volume/HAND_Human_Human_Study/Kinect/mkv_2_
 
 # The global variables below probably will not change
 KINECT_CUT_END_FRAMES = 20  # number of frames to cut at the end of the video, this is to remove the last few frames that are not needed
+CONSTANT_OFFSET = .6        # offset in seconds
 OPTI_FPS = 120                  # default number of frames on Optitrack
 KINECT_FPS = 30                 # Current Kinect Script runs at 30 FPS
 
@@ -136,7 +137,7 @@ if __name__ == "__main__":
         print(f"Failed to read Kinect start time: {e}")
         exit(1)
     
-    kinect_start_time += timedelta(microseconds=KINECT_OFFSET)
+    kinect_start_time += timedelta(microseconds=KINECT_OFFSET) + timedelta(seconds=CONSTANT_OFFSET)
     print("Kinect start time from file:", kinect_start_time)
 
     kinect_total_frames = count_frames(KINECT_VIDEO)
