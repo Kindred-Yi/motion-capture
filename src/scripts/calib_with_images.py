@@ -20,8 +20,8 @@ def parse_args():
     #     help="(Optional) Path to the depth image (e.g. depth.png or depth.npy)"
     # )
     parser.add_argument(
-        '--skip-update-intrinsics', dest='update_intrinsics', action='store_false',
-        help="Use this flag to skip connecting to the camera and read intrinsics from the file instead."
+        '--intrinsics', dest='intrinsics_path', default = None,
+        help='Path to the intrinsics file. If not provided, it will read form azure kinect, so make sure to have it plugged in if not provided.'
     )
     parser.add_argument(
         '-f', '--folder',
@@ -67,8 +67,8 @@ def parse_args():
 
 # Trying out differing values
 ARUCO_DICT_NAME   = cv2.aruco.DICT_6X6_250
-MARKER_LENGTH     = 0.0357   # meters
-MARKER_SEPARATION = 0.0094  # meters
+MARKER_LENGTH     = 0.0352   # meters
+MARKER_SEPARATION = 0.0091  # meters
 BOARD_ROWS        = 4
 BOARD_COLS        = 6
 
@@ -84,7 +84,7 @@ def main():
     args = parse_args()
 
     # ---------- 1) Read intrinsics ----------
-    if(args.update_intrinsics):
+    if(args.intrinsics_path is None):
         k4a = PyK4A(Config())
         k4a.start()
 
@@ -101,7 +101,7 @@ def main():
         fs.release()
         print("✅ Saved to azure_kinect_intrinsics.yml")
     else:
-        fs = cv2.FileStorage("azure_kinect_intrinsics.yml", cv2.FILE_STORAGE_READ)
+        fs = cv2.FileStorage(args.intrinsics_path, cv2.FILE_STORAGE_READ)
         camera_matrix = fs.getNode("cameraMatrix").mat()
         dist_coeffs   = fs.getNode("distCoeffs").mat()
         fs.release()

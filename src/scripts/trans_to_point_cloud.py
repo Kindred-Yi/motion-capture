@@ -87,23 +87,21 @@ def main():
     parser.add_argument('--rgb', required=True, help='Path to RGB image')
     parser.add_argument('--depth', required=True, help='Path to depth image')
     parser.add_argument('--output', default='output.pcd', help='Output point cloud file path')
-    parser.add_argument('--intrinsic', default='azure_kinect_intrinsics.yml', help='Camera intrinsic parameters file')
-    parser.add_argument('--extrinsic', default='azure_kinect_extrinsics.yml', help='Camera extrinsic parameters file')
+    parser.add_argument('--intrinsics', required = True, default='azure_kinect_intrinsics.yml', help='Camera intrinsic parameters file')
+    parser.add_argument('--extrinsics', default='azure_kinect_extrinsics.yml', help='Camera extrinsic parameters file')
 
     args = parser.parse_args()
 
     try:
         color_raw, depth_raw = read_rgbd_images(args.rgb, args.depth)
 
-        camera_intrinsic = None
-        if args.intrinsic:
-            camera_intrinsic = load_azure_kinect_intrinsics(args.intrinsic)
+        camera_intrinsics = load_azure_kinect_intrinsics(args.intrinsics)
 
         
-        camera_extrinsics = load_camera_extrinsics(args.extrinsic)
+        camera_extrinsics = load_camera_extrinsics(args.extrinsics)
 
         # Create point cloud using extrinsics, makes it in coordinate system of the Apriltag board
-        pcd = create_point_cloud(color_raw, depth_raw, camera_intrinsic, camera_extrinsics)
+        pcd = create_point_cloud(color_raw, depth_raw, camera_intrinsics, camera_extrinsics)
 
         # Save point cloud
         o3d.io.write_point_cloud(args.output, pcd)

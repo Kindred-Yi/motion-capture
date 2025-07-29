@@ -231,14 +231,14 @@ def main():
     parser.add_argument('-crc', '--camRigidcalib', dest='camRigidcalib', default = 'Kinect_cam', help='Transformation file from Camera to its Rigid Body (T_rigid_cam)')
     parser.add_argument('-c','--cam_body_name', dest='camBodyName', required=True, help='The name of the rigid body attached to the camera in the OptiTrack data')
     parser.add_argument('--output', default='output_world.pcd', help='Output world-frame point cloud file path')
-    parser.add_argument('--intrinsic', default='azure_kinect_intrinsics.yml', help='Camera intrinsic parameters file')
+    parser.add_argument('--intrinsics', default='azure_kinect_intrinsics.yml', help='Camera intrinsic parameters file')
 
     args = parser.parse_args()
 
     try:
         # 1. Load images and intrinsics
         color_raw, depth_raw = read_rgbd_images(args.rgb, args.depth)
-        camera_intrinsic, dist_coeffs = load_azure_kinect_intrinsics(color_raw=color_raw, intrinsic_file=args.intrinsic)
+        camera_intrinsic, dist_coeffs = load_azure_kinect_intrinsics(color_raw=color_raw, intrinsic_file=args.intrinsics)
 
         # 2. Create point cloud in the Camera's local coordinate frame
         pcd_camera_frame = create_point_cloud(color_raw, depth_raw, camera_intrinsic, dist_coeffs=dist_coeffs)
