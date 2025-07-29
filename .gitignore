@@ -3,6 +3,8 @@
 venv-py310/
 venv/
 Open3D/
+motion-capture-env/
+.venv312/
 
 # Python cache
 __pycache__/
