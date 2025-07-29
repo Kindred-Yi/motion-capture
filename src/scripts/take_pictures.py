@@ -5,6 +5,7 @@ import cv2
 import numpy as np
 import os
 from pyk4a import PyK4A, Config, CalibrationType, ColorControlMode
+from pyk4a import ColorResolution # Import ColorResolution
 
 # --- Define ArUco Board details ---
 ARUCO_DICT_NAME = cv2.aruco.DICT_6X6_250
@@ -13,7 +14,7 @@ BOARD_COLS = 6
 MARKER_LENGTH = 0.0354  # meters
 MARKER_SEPARATION = 0.0091  # meters
 
-EXPOSURE = 8310  # microseconds, adjust as needed
+EXPOSURE = 10000  # Default exposure time in microseconds
 
 aruco_dict = cv2.aruco.getPredefinedDictionary(ARUCO_DICT_NAME)
 board = cv2.aruco.GridBoard((BOARD_COLS, BOARD_ROWS), MARKER_LENGTH, MARKER_SEPARATION, aruco_dict)
@@ -28,6 +29,20 @@ def main():
         required=True,
         help="Path to the folder where images will be saved."
     )
+    parser.add_argument(
+        "--exposure",
+        type=int,
+        default=EXPOSURE,
+        help="Camera exposure time in microseconds."
+    )
+     # Add resolution argument
+    parser.add_argument(
+        "--resolution",
+        type=str,
+        default="720p",
+        choices=["720p", "1080p", "1440p", "1536p", "2160p", "3072p"],
+        help="Color camera resolution (e.g., 720p, 1080p)."
+    )
 
     
     args = parser.parse_args()
@@ -39,12 +54,28 @@ def main():
     os.makedirs(depth_dir, exist_ok=True)
     print(f"✅ Saving images to: {args.output}")
 
+    # --- Map resolution string to PyK4A enum ---
+    resolution_map = {
+        "720p": ColorResolution.RES_720P,
+        "1080p": ColorResolution.RES_1080P,
+        "1440p": ColorResolution.RES_1440P,
+        "1536p": ColorResolution.RES_1536P,
+        "2160p": ColorResolution.RES_2160P,
+        "3072p": ColorResolution.RES_3072P,
+    }
+    selected_resolution = resolution_map.get(args.resolution.lower())
+
+    if selected_resolution is None:
+        print(f"❌ Invalid resolution: {args.resolution}. Using default 720p.")
+        selected_resolution = ColorResolution.RES_720P
+
     # --- Initialize Camera and get intrinsics ---
-    k4a = PyK4A(Config())
+    # Pass the selected resolution to the Config object
+    k4a = PyK4A(Config(color_resolution=selected_resolution))
 
     k4a.start()
 
-    k4a.exposure = EXPOSURE  # Set exposure time
+    k4a.exposure = args.exposure  # Set exposure time
 
     # Save camera intrinsics for the second script
     camera_matrix = k4a.calibration.get_camera_matrix(CalibrationType.COLOR)
