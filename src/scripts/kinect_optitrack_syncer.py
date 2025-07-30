@@ -259,16 +259,19 @@ if __name__ == "__main__":
         print(f"At Kinect Video Time {kinect_video_time_str}\nKinect Frame: {kinect_frame}, Optitrack Frame: {opti_frame}")
     else:
         print("No kinect_video_time provided.")
-    kinect_start_frame = 1
+    
     # 11. Create CSV for Data Post Processing (PCA)
     if args.create_csv:
-        # Step 1: Copy the original file
+        # Step 1: Copy the original file (used to avoid modifying the original while testing)
         copied_file = os.path.join(OUTPUT_FOLDER, "calib_desktop_000_copy.csv")
         shutil.copyfile(OPTI_CSV, copied_file)
 
         # Step 2: Read metadata rows (first 6 lines)
         with open(copied_file, "r", encoding="utf-8", errors="ignore") as f:
             metadata_lines = [next(f) for _ in range(6)]
+        
+        # Add two empty columns (,,) to the start of each metadata line to account for tghe two new columsn added to data frame for kinect frame and time
+        metadata_lines = [',,' + line for line in metadata_lines]
 
         # Step 3: Read the rest as a DataFrame starting from header row (line 7)
         df = pd.read_csv(copied_file, skiprows=6, header=0, low_memory=False)
@@ -313,8 +316,11 @@ if __name__ == "__main__":
         # Ensure unique column names by removing duplicates
         df.columns = pd.Series(df.columns).apply(lambda x: x.split('.')[0]).tolist()
 
+        # Rename columns starting with "Unnamed" to an empty string
+        df.columns = ['' if str(col).startswith('Unnamed') else col for col in df.columns]
+
         # Step 8: Save metadata + modified data to a new file
-        output_file = os.path.join(OUTPUT_FOLDER, "calib_desktop_000_processed.csv")
+        output_file = os.path.join(OUTPUT_FOLDER, "processed.csv")
         with open(output_file, "w", encoding="utf-8", newline='') as f:
             f.writelines(metadata_lines)        # Metadata (6 lines)
             df.to_csv(f, index=False, lineterminator='\n')  # ✅ correct
