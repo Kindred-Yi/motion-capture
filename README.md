@@ -41,7 +41,7 @@ python3 ./Open3D/examples/python/reconstruction_system/sensors/azure_kinect_mkv_
 **Note for both combine_point_cloud_optitrack_1_frame.py, it is the upmost importance to specify which intrinsic you are using as different resolutions have different intrinsics values. To figure out which one to use, please look at one of the color or depth images, right click, and go to properties to see the image resolution**
 
 
-With calibration data and the mkv file extracted, all you need to do now is run 6, 7, and 8 repeatedly for all the files. Use 6 to check for alignment. Use 7 with "-c" to sync up times, changing CONSTANT OFFSET if around. Use 8 to visualize how well the sync is. 
+With calibration data and the mkv file extracted, all you need to do now is run 6, 7, and 8 repeatedly for all the files. Use 6 to check for alignment. Use 7 with "-c" to sync up times, changing CONSTANT OFFSET if around. Use 8 to visualize how well the sync is. Please remember to change to the correct hand_eye_calibration file as well as the correct intrinics file.
 
 
 6) Visualize the data for 1 frame through combine_point_cloud_optitrack_1_frame.py. Use -h if unsure of the command line arguments
