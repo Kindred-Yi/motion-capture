@@ -310,11 +310,15 @@ if __name__ == "__main__":
         # Step 7: Reorder columns
         df = df[["Kinect Frame", "kinect time (s)"] + [col for col in df.columns if col not in ["Kinect Frame", "kinect time (s)"]]]
 
+        # Ensure unique column names by removing duplicates
+        df.columns = pd.Series(df.columns).apply(lambda x: x.split('.')[0]).tolist()
+
         # Step 8: Save metadata + modified data to a new file
         output_file = os.path.join(OUTPUT_FOLDER, "calib_desktop_000_processed.csv")
         with open(output_file, "w", encoding="utf-8", newline='') as f:
             f.writelines(metadata_lines)        # Metadata (6 lines)
             df.to_csv(f, index=False, lineterminator='\n')  # ✅ correct
+        print(f"Processed CSV saved to {output_file}")
 
 
     
