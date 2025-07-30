@@ -10,14 +10,16 @@ import shutil
 
 # TODO Must change all the below to appropriate values
 KINECT_START = r"D:/HAND_Human_Human_Study/Kinect/record_start_time_3pm_2_7_14.txt"
-KINECT_OFFSET = 200600  # must change to correct OFFSET, use k4aviewer to find this
+KINECT_OFFSET = 200388  # must change to correct OFFSET, use k4aviewer to find this
 KINECT_VIDEO = r"D:/HAND_Human_Human_Study/Kinect/extracted videos/output_3pm_2_7_14.mkv"
 OPTI_CSV = r"D:/HAND_Human_Human_Study/OptiTrack/peanut butter 3pm 7-14 2.csv"
 OUTPUT_FOLDER = r"D:/HAND_Human_Human_Study/Kinect/mkv_2_colordepth/7-14 3pm 2"
+CONSTANT_OFFSET = -.225        # offset in seconds, this is not constant for all videos, but constant for only this video (just play with numbers until correct) 
+# For the data collected in our study, the more positive you go, you will be shifting the kinect video bacck (another way to think about is moving the optitrack video forward), if you go closer to negative or to negative, it will vice versa
 
 # The global variables below probably will not change
 KINECT_CUT_END_FRAMES = 20  # number of frames to cut at the end of the video, this is to remove the last few frames that are not needed
-CONSTANT_OFFSET = .6        # offset in seconds, this is not constant for all videos, but constant for only this video
+
 OPTI_FPS = 120                  # default number of frames on Optitrack
 KINECT_FPS = 30                 # Current Kinect Script runs at 30 FPS
 
