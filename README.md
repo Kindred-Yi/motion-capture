@@ -42,7 +42,7 @@ python3 ./Open3D/examples/python/reconstruction_system/sensors/azure_kinect_mkv_
 
 6) Visualize the data for 1 frame through combine_point_cloud_optitrack_1_frame.py. Use -h if unsure of the command line arguments
 ```
-python src/scripts/combine_point_cloud_optitrack_1_frame.py --rgb "D:\HAND_Human_Human_Study\Kinect\mkv_2_colordepth\7-16 4pm 1\color\00000.jpg" --depth "D:\HAND_Human_Human_Study\Kinect\mkv_2_colordepth\7-16 4pm 1\depth\00000.png" -crc src/data/frames_calibration_desktop2/hand_eye_calibration_result.yml -o "D:\HAND_Human_Human_Study\OptiTrack\peanut butter 2025-07-16 4 1.csv" -c Kinect_cam2 --intrinsics azure_kinect_intrinsics_720.yml
+python src/scripts/combine_point_cloud_optitrack_1_frame.py --rgb "D:\HAND_Human_Human_Study\Kinect\mkv_2_colordepth\7-16 4pm 1\color\00000.jpg" --depth "D:\HAND_Human_Human_Study\Kinect\mkv_2_colordepth\7-16 4pm 1\depth\00000.png" -crc src/data/frames_calibration_desktop/hand_eye_calibration_result.yml -o "D:\HAND_Human_Human_Study\OptiTrack\peanut butter 2025-07-16 4 1.csv" -c Kinect_cam2 --intrinsics azure_kinect_intrinsics_720.yml
 ```
 
 7) Run the kinect_optitrack_syncer.py program. This has no command line arguments. Instead, you have to change the global variables in this

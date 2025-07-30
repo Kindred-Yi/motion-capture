@@ -6,17 +6,18 @@ import math
 import json
 import chardet
 import os
+import shutil
 
 # TODO Must change all the below to appropriate values
-KINECT_START = r"D:/HAND_Human_Human_Study/Kinect/start_time_16am_3_710.txt"
+KINECT_START = r"D:/HAND_Human_Human_Study/Kinect/record_start_time_3pm_2_7_14.txt"
 KINECT_OFFSET = 200600  # must change to correct OFFSET, use k4aviewer to find this
-KINECT_VIDEO = r"D:/HAND_Human_Human_Study/Kinect/extracted videos/output_16am_3_710.mkv"
-OPTI_CSV = r"D:/HAND_Human_Human_Study/OptiTrack/peanut butter 4pm 7-10 3.csv"
-OUTPUT_FOLDER = r"D:/HAND_Human_Human_Study/Kinect/mkv_2_colordepth/7-10 16am 3"
+KINECT_VIDEO = r"D:/HAND_Human_Human_Study/Kinect/extracted videos/output_3pm_2_7_14.mkv"
+OPTI_CSV = r"D:/HAND_Human_Human_Study/OptiTrack/peanut butter 3pm 7-14 2.csv"
+OUTPUT_FOLDER = r"D:/HAND_Human_Human_Study/Kinect/mkv_2_colordepth/7-14 3pm 2"
 
 # The global variables below probably will not change
 KINECT_CUT_END_FRAMES = 20  # number of frames to cut at the end of the video, this is to remove the last few frames that are not needed
-CONSTANT_OFFSET = .6        # offset in seconds
+CONSTANT_OFFSET = .6        # offset in seconds, this is not constant for all videos, but constant for only this video
 OPTI_FPS = 120                  # default number of frames on Optitrack
 KINECT_FPS = 30                 # Current Kinect Script runs at 30 FPS
 
@@ -127,6 +128,13 @@ if __name__ == "__main__":
         default=None,
         help = 'Kinect video time in format MM:SS, e.g. 00:30 for 30 seconds'
     )
+    parser.add_argument(
+    "-c",
+    "--create_csv",
+    action="store_true",
+    help="Flag to create CSV for Data Post Processing (PCA). Set to true if -c is included."
+    )
+
     args = parser.parse_args()
 
 
@@ -251,6 +259,63 @@ if __name__ == "__main__":
         print(f"At Kinect Video Time {kinect_video_time_str}\nKinect Frame: {kinect_frame}, Optitrack Frame: {opti_frame}")
     else:
         print("No kinect_video_time provided.")
+    kinect_start_frame = 1
+    # 11. Create CSV for Data Post Processing (PCA)
+    if args.create_csv:
+        # Step 1: Copy the original file
+        copied_file = os.path.join(OUTPUT_FOLDER, "calib_desktop_000_copy.csv")
+        shutil.copyfile(OPTI_CSV, copied_file)
+
+        # Step 2: Read metadata rows (first 6 lines)
+        with open(copied_file, "r", encoding="utf-8", errors="ignore") as f:
+            metadata_lines = [next(f) for _ in range(6)]
+
+        # Step 3: Read the rest as a DataFrame starting from header row (line 7)
+        df = pd.read_csv(copied_file, skiprows=6, header=0, low_memory=False)
+
+        # Step 4: Rename columns
+        df.columns = df.columns.str.strip()
+        df.rename(columns={
+            "Frame": "Optitrack Frame",
+            "Time (Seconds)": "Optitrack Seconds"
+        }, inplace=True)
+
+        # ✅ Ensure "Optitrack Frame" is numeric so we can filter by frame number
+        df["Optitrack Frame"] = pd.to_numeric(df["Optitrack Frame"], errors="coerce")
+
+        # ✅ Drop any rows where "Optitrack Frame" was invalid (NaN after conversion)
+        df.dropna(subset=["Optitrack Frame"], inplace=True)
+
+        # ✅ Convert to integers for precise matching (optional, for safety)
+        df["Optitrack Frame"] = df["Optitrack Frame"].astype(int)
+
+        # ✅ Keep only rows within the synchronized time window
+        df = df[
+            (df["Optitrack Frame"] >= opti_start_frame) &
+            (df["Optitrack Frame"] <= opti_end_frame)
+        ].reset_index(drop=True)
+
+        # Step 5: Filter rows (keep every 4th)
+        df.reset_index(drop=True, inplace=True)
+        df = df[df.index % 4 == 0].reset_index(drop=True)
+
+        # Step 6: Add Kinect columns
+        # ✅ Update Kinect Frame and Time using actual aligned start frame
+        num_rows = len(df)
+        kinect_frames = list(range(kinect_start_frame, kinect_start_frame + num_rows))
+        df["Kinect Frame"] = kinect_frames
+        df["kinect time (s)"] = [(f / KINECT_FPS) for f in kinect_frames]
+
+
+        # Step 7: Reorder columns
+        df = df[["Kinect Frame", "kinect time (s)"] + [col for col in df.columns if col not in ["Kinect Frame", "kinect time (s)"]]]
+
+        # Step 8: Save metadata + modified data to a new file
+        output_file = os.path.join(OUTPUT_FOLDER, "calib_desktop_000_processed.csv")
+        with open(output_file, "w", encoding="utf-8", newline='') as f:
+            f.writelines(metadata_lines)        # Metadata (6 lines)
+            df.to_csv(f, index=False, lineterminator='\n')  # ✅ correct
+
 
     
 
