@@ -43,6 +43,7 @@ python3 ./Open3D/examples/python/reconstruction_system/sensors/azure_kinect_mkv_
 
 With calibration data and the mkv file extracted, all you need to do now is run 6, 7, and 8 repeatedly for all the files. Use 6 to check for alignment. Use 7 with "-c" to sync up times, changing CONSTANT OFFSET if around. Use 8 to visualize how well the sync is. Please remember to change to the correct hand_eye_calibration file as well as the correct intrinics file.
 
+https://drive.google.com/file/d/1Nv8DGOusIYY1S8yeKWQyEsbfxwkyMm0y/view?usp=drive_link # tutorial here
 
 6) Visualize the data for 1 frame through combine_point_cloud_optitrack_1_frame.py. Use -h if unsure of the command line arguments
 ```
