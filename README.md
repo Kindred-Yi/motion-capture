@@ -41,7 +41,11 @@ python3 ./Open3D/examples/python/reconstruction_system/sensors/azure_kinect_mkv_
 **Note for both combine_point_cloud_optitrack_1_frame.py, it is the upmost importance to specify which intrinsic you are using as different resolutions have different intrinsics values. To figure out which one to use, please look at one of the color or depth images, right click, and go to properties to see the image resolution**
 
 
-With calibration data and the mkv file extracted, all you need to do now is run 6, 7, and 8 repeatedly for all the files. Use 6 to check for alignment. Use 7 with "-c" to sync up times, changing CONSTANT OFFSET if around. Use 8 to visualize how well the sync is. Please remember to change to the correct hand_eye_calibration file as well as the correct intrinics file.
+With calibration data and the mkv file extracted, all you need to do now is run 6, 7, and 8 repeatedly for all the files. Use 6 to check for alignment. Use 7 with "-c" to sync up times, changing CONSTANT OFFSET if around. Use 8 to visualize how well the sync is. Please remember to change to the correct hand_eye_calibration file as well as the correct intrinics file with the 720 or 1080. For the extrinsics, use src/data/frames_calibration2 for 7/14 3pm and before studies, use src/data/frames_calibration_desktop/ for all the other studies, which are the ones done on desktop
+
+Also please note, this is not implemented yet as I forgot however, for the studies that we used the wrong calibraiton stick, we will need to divide all, x, y z TRANSLATION not rotation by 2. That will synce them up.
+
+https://docs.google.com/spreadsheets/d/1y84xL2pIli6f-JfOeQtClIvSnVqZi3RXdefXi8E0kpk/edit?gid=0#gid=0 # table of the studies
 
 https://drive.google.com/file/d/1Nv8DGOusIYY1S8yeKWQyEsbfxwkyMm0y/view?usp=drive_link # tutorial here
 
