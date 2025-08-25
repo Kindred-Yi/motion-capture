@@ -5,6 +5,7 @@ venv/
 Open3D/
 motion-capture-env/
 .venv312/
+data_processing/assets/
 
 # Python cache
 __pycache__/

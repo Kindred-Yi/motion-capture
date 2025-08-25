@@ -4,7 +4,7 @@ First we want to first get calibration data for the hand eye calibration. Please
 
 1) First we set up the environment
 ```
-source .venv/Scripts/activate # Any venv will work, just need to set up the environment first
+source motion-capture-env/bin/activate # Any venv will work, just need to set up the environment first
 ```
 
 2) Now We are going to take pictures for the calibration. Look at the window pop up and follow directions to take pictures. The --resolution is optional, but HIGHLY recommend. The program will also create an intrinsics file. Please rename that intrinsics file to the correct resolution
@@ -51,7 +51,7 @@ https://drive.google.com/file/d/1Nv8DGOusIYY1S8yeKWQyEsbfxwkyMm0y/view?usp=drive
 
 6) Visualize the data for 1 frame through combine_point_cloud_optitrack_1_frame.py. Use -h if unsure of the command line arguments
 ```
-python src/scripts/combine_point_cloud_optitrack_1_frame.py --rgb "D:\HAND_Human_Human_Study\Kinect\mkv_2_colordepth\7-16 4pm 1\color\00000.jpg" --depth "D:\HAND_Human_Human_Study\Kinect\mkv_2_colordepth\7-16 4pm 1\depth\00000.png" -crc src/data/frames_calibration_desktop/hand_eye_calibration_result.yml -o "D:\HAND_Human_Human_Study\OptiTrack\peanut butter 2025-07-16 4 1.csv" -c Kinect_cam2 --intrinsics azure_kinect_intrinsics_720.yml
+python src/scripts/combine_point_cloud_optitrack_1_frame.py --rgb "D:\HAND_Human_Human_Study\Kinect\mkv_2_colordepth\7-16 4pm 1\color\00000.jpg" --depth "D:\HAND_Human_Human_Study\Kinect\mkv_2_colordepth\7-16 4pm 1\depth\00000.png" -crc src/data/frames_calibration_desktop/hand_eye_calibration_result.yml -o "D:\HAND_Human_Human_Study\OptiTrack\peanut butter 2025-07-16 4 1.csv" -c Kinect_cam --intrinsics azure_kinect_intrinsics_720.yml
 ```
 
 7) Run the kinect_optitrack_syncer.py program. This has no command line arguments. Instead, you have to change the global variables in this
