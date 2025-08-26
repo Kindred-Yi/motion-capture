@@ -11,16 +11,11 @@ from pathlib import Path
 
 # TODO Must change all the below to appropriate values
 
-KINECT_START = Path(r"D:\HAND_Human_Human_Study\Kinect\record_start_time_11am_3_7_14.txt")
-KINECT_VIDEO = Path(r"D:\HAND_Human_Human_Study\Kinect\extracted videos\output_11am_3_7_14.mkv")
-OPTI_CSV     = Path(r"D:\HAND_Human_Human_Study\OptiTrack\laptop data\peanut butter 11am 7-14 3.csv")
-OUTPUT_FOLDER= Path(r"D:\HAND_Human_Human_Study\Kinect\mkv_2_colordepth\7-14 11am 3")
-
-# KINECT_START = r"D:/HAND_Human_Human_Study/Kinect/record_start_time_11am_3_7_14.txt"
+KINECT_START = Path(r"D:\HAND_Human_Human_Study\Kinect data sorted\Peanut Butter\7-10 16am 3\start_time_16am_3_710.txt")
+KINECT_VIDEO = Path(r"D:\HAND_Human_Human_Study\Kinect data sorted\Peanut Butter\7-10 16am 3\output_16am_3_710.mkv")
+OPTI_CSV     = Path(r"D:\HAND_Human_Human_Study\Kinect data sorted\Peanut Butter\7-10 16am 3\peanut butter 4pm 7-10 3.csv")
+OUTPUT_FOLDER= Path(r"D:\HAND_Human_Human_Study\Kinect data sorted\Peanut Butter\7-10 16am 3")
 KINECT_OFFSET = 200400  # must change to correct OFFSET, use k4aviewer to find this
-# KINECT_VIDEO = r"D:/HAND_Human_Human_Study/Kinect/extracted videos/output_11am_3_7_14.mkv"
-# OPTI_CSV = r"D:/HAND_Human_Human_Study/OptiTrack/laptop data/peanut butter 11am 7-14 3.csv"
-# OUTPUT_FOLDER = r"D:/HAND_Human_Human_Study/Kinect/mkv_2_colordepth/7-14 11am 3"
 CONSTANT_OFFSET = -.29        # offset in seconds, this is not constant for all videos, but constant for only this video (just play with numbers until correct) 
 # For the data collected in our study, the more positive you go, you will be shifting the kinect video bacck (another way to think about is moving the optitrack video forward), if you go closer to negative or to negative, it will vice versa
 
@@ -146,6 +141,8 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    session_name = Path(OPTI_CSV).stem
+
 
     # 1. Load and offset Kinect start time as well as count frames in the video
     try:
@@ -251,7 +248,7 @@ if __name__ == "__main__":
         "optitrack_start_frame": opti_start_frame,
         "optitrack_end_frame": opti_end_frame
     }
-    JSON_FILE = os.path.join(OUTPUT_FOLDER, "frame_indices.json")
+    JSON_FILE = os.path.join(OUTPUT_FOLDER, f"frame_indices_{session_name}.json")
 
     with open(JSON_FILE, 'w') as f:
         json.dump(frame_data, f, indent=4)
@@ -329,43 +326,8 @@ if __name__ == "__main__":
         df.columns = ['' if str(col).startswith('Unnamed') else col for col in df.columns]
 
         # Step 8: Save metadata + modified data to a new file
-        output_file = os.path.join(OUTPUT_FOLDER, "processed.csv")
+        output_file = os.path.join(OUTPUT_FOLDER, f"processed_{session_name}.csv")
         with open(output_file, "w", encoding="utf-8", newline='') as f:
             f.writelines(metadata_lines)        # Metadata (6 lines)
             df.to_csv(f, index=False, lineterminator='\n')  # ✅ correct
         print(f"Processed CSV saved to {output_file}")
-
-
-    
-
-
-
-
-
-
-    # # 6. Build Kinect-frame timestamps at nominal 30 FPS
-    # fps_kinect = 30.0
-    # kine_times = [
-    #     kinect_start + timedelta(seconds=i/fps_kinect)
-    #     for i in range(n_kinect)
-    # ]
-    # df_kine = pd.DataFrame({
-    #     'kinect_frame': range(n_kinect),
-    #     'raw_kine_time': kine_times
-    # })
-
-    # # 7. Align Kinect times into OptiTrack's timebase
-    # df_kine['kine_time'] = df_kine['raw_kine_time'] - offset
-
-    # # 8. Nearest-neighbor join
-    # df_kine = df_kine.sort_values('kine_time')
-    # df_opti = df_opti.sort_values('opti_time')
-    # df_sync = pd.merge_asof(
-    #     df_kine, df_opti,
-    #     left_on='kine_time', right_on='opti_time',
-    #     direction='nearest'
-    # )
-
-    # # 9. Extract and print your frame-to-frame mapping
-    # mapping = df_sync[['kinect_frame','opti_frame']]
-    # print(mapping.head(10))
