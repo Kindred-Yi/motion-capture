@@ -20,7 +20,6 @@ CONSTANT_OFFSET = -.29        # offset in seconds, this is not constant for all 
 # For the data collected in our study, the more positive you go, you will be shifting the kinect video bacck (another way to think about is moving the optitrack video forward), if you go closer to negative or to negative, it will vice versa
 
 # The global variables below probably will not change
-KINECT_CUT_END_FRAMES = 20  # number of frames to cut at the end of the video, this is to remove the last few frames that are not needed
 
 OPTI_FPS = 120                  # default number of frames on Optitrack
 KINECT_FPS = 30                 # Current Kinect Script runs at 30 FPS
@@ -224,7 +223,7 @@ if __name__ == "__main__":
     if initial_end_offset.total_seconds() >= 0:
         print("Optitrack ends first")
         new_kinect_len= opti_end_time - kinect_start_time
-        kinect_end_frame = math.floor(new_kinect_len.total_seconds() * KINECT_FPS) - KINECT_CUT_END_FRAMES
+        kinect_end_frame = math.floor(new_kinect_len.total_seconds() * KINECT_FPS)
 
         new_kinect_end_time = kinect_start_time + timedelta(seconds= kinect_end_frame / KINECT_FPS)
         opti_end_delta_time = new_kinect_end_time - opti_start_time
@@ -234,7 +233,6 @@ if __name__ == "__main__":
     else:
         print("Kinect ends first Logic")
         
-        kinect_end_frame = kinect_end_frame - KINECT_CUT_END_FRAMES# does not change, only including this code to improve readability
         opti_end_delta_time = kinect_end_time - opti_start_time
         opti_end_frame = math.floor(opti_end_delta_time.total_seconds() * OPTI_FPS)
 
