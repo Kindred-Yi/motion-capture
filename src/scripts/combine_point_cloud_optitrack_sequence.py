@@ -163,14 +163,13 @@ def main():
     # MODIFIED: Changed from single files to folders
     parser.add_argument('-rgb','--color_folder', dest='color_folder', required=True, help='Path to the folder containing color images.')
     parser.add_argument('-depth', '--depth_folder', dest='depth_folder', required=True, help='Path to the folder containing depth images.')
-    parser.add_argument('-o','--optitrack',dest='optitrack', required=True, help='Path to the OptiTrack CSV file.')
+    parser.add_argument('-o','--optitrack',dest='optitrack', required=True, help='Path to the Processed OptiTrack CSV file.') # please us processed optitrack csv file
     parser.add_argument('-crc', '--camRigidcalib', dest='camRigidcalib', required=True, help='Transformation file from Camera to its Rigid Body.')
     parser.add_argument('-c', '--cam_body_name', dest='cam_body_name', default='Kinect_cam', help='Name of the rigid body attached to the camera.')
     parser.add_argument('--intrinsics', default='azure_kinect_intrinsics.yml', help='Camera intrinsic parameters file.')
     # MODIFIED: Start frame is now an offset for OptiTrack data, end_frame is removed.
     parser.add_argument('-vf', '--video_frames', dest='video_frames', type=str, default=1, help='path to JSON file for start and end frames')
     parser.add_argument('-s', '--skip_frames', dest='skip_frames', type=int, default=0, help='Number of initial kinect frames to skip.')
-    parser.add_argument('-p','--processed', dest='use_processed', action='store_true', help='using processed OptiTrack data at 30 FPS instead of raw 120 FPS')
 
     args = parser.parse_args()
 
@@ -208,18 +207,15 @@ def main():
         kinect_start_frame = frame_data["kinect_start_frame"]
         kinect_end_frame = frame_data["kinect_end_frame"]
         counter = 0
-        if args.use_processed:
-            frame_ratio = 1
-            optitrack_frame_num = optitrack_start_frame + args.skip_frames
-            kinect_frame_num = kinect_start_frame + args.skip_frames
-        else:
-            frame_ratio = OPTI_FPS / KINECT_FPS
-            optitrack_frame_num = optitrack_start_frame + int(args.skip_frames * frame_ratio)
-            kinect_frame_num = kinect_start_frame + args.skip_frames
+            
+        frame_ratio = 1
+        optitrack_frame_num = optitrack_start_frame + args.skip_frames
+        kinect_frame_num = kinect_start_frame + args.skip_frames
+
         
         while  optitrack_frame_num < optitrack_end_frame:
             # Calculate the corresponding frame number for OptiTrack data
-            print(f"(OptiTrack Frame: {optitrack_frame_num}) (Kinect Frame: {kinect_frame_num}) ---\n")
+            print(f"(OptiTrack Frame: {optitrack_frame_num * 4}) (Kinect Frame: {kinect_frame_num}) ---\n")
 
             # 1. load optitrack data
             all_poses_world = get_all_rigid_body_poses(mocap_data, optitrack_frame_num)

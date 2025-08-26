@@ -47,11 +47,11 @@ Also please note, this is not implemented yet as I forgot however, for the studi
 
 https://docs.google.com/spreadsheets/d/1y84xL2pIli6f-JfOeQtClIvSnVqZi3RXdefXi8E0kpk/edit?gid=0#gid=0 # table of the studies
 
-https://drive.google.com/file/d/1Nv8DGOusIYY1S8yeKWQyEsbfxwkyMm0y/view?usp=drive_link # tutorial here
+https://drive.google.com/file/d/1Nv8DGOusIYY1S8yeKWQyEsbfxwkyMm0y/view?usp=drive_link # tutorial here (not updated)
 
 6) Visualize the data for 1 frame through combine_point_cloud_optitrack_1_frame.py. Use -h if unsure of the command line arguments
 ```
-python src/scripts/combine_point_cloud_optitrack_1_frame.py --rgb "D:\HAND_Human_Human_Study\Kinect\mkv_2_colordepth\7-16 4pm 1\color\00000.jpg" --depth "D:\HAND_Human_Human_Study\Kinect\mkv_2_colordepth\7-16 4pm 1\depth\00000.png" -crc src/data/frames_calibration_desktop/hand_eye_calibration_result.yml -o "D:\HAND_Human_Human_Study\OptiTrack\peanut butter 2025-07-16 4 1.csv" -c Kinect_cam --intrinsics azure_kinect_intrinsics_720.yml
+python src/scripts/combine_point_cloud_optitrack_1_frame.py -rgb "D:\HAND_Human_Human_Study\Kinect data sorted\Peanut Butter\7-14 3pm 2\color\00000.jpg" -depth "D:\HAND_Human_Human_Study\Kinect data sorted\Peanut Butter\7-14 3pm 2\depth\00000.png" -crc src/data/frames_calibration2/hand_eye_calibration_result.yml -o "D:\HAND_Human_Human_Study\Kinect data sorted\Peanut Butter\7-14 3pm 2\peanut butter 3pm 7-14 2.csv" -c Kinect_cam --intrinsics azure_kinect_intrinsics_720.yml
 ```
 
 7) Run the kinect_optitrack_syncer.py program. This has no command line arguments. Instead, you have to change the global variables in this
@@ -61,7 +61,7 @@ python src/scripts/kinect_optitrack_syncer.py -c
 
 8) Code not finished yet due to need for testing in Calibration. However, general code is already there. All that is left to do is to make sure every kinect frame has 4 optitrack frames as well as read the json file from kinect_optitrack_syncer
 ```
-python src/scripts/combine_point_cloud_optitrack_sequence.py -c "D:\HAND_Human_Human_Study\Kinect\mkv_2_colordepth\7-14 3pm 2\color" -d "D:\HAND_Human_Human_Study\Kinect\mkv_2_colordepth\7-14 3pm 2\depth" -o "D:\HAND_Human_Human_Study\OptiTrack\laptop data\peanut butter 3pm 7-14 2.csv" -crc src/data/frames_calibration2/hand_eye_calibration_result.yml --cam_body_name Kinect_cam --intrinsic azure_kinect_intrinsics_720.yml -vf "D:\HAND_Human_Human_Study\Kinect\mkv_2_colordepth\7-14 3pm 2\frame_indices.json"
+python src/scripts/combine_point_cloud_optitrack_sequence.py -rgb "D:\HAND_Human_Human_Study\Kinect data sorted\Peanut Butter\7-14 3pm 2\color" -depth "D:\HAND_Human_Human_Study\Kinect data sorted\Peanut Butter\7-14 3pm 2\depth" -crc src/data/frames_calibration2/hand_eye_calibration_result.yml -o "D:\HAND_Human_Human_Study\Kinect data sorted\Peanut Butter\7-14 3pm 2\processed_peanut butter 3pm 7-14 2.csv" -c Kinect_cam --intrinsics azure_kinect_intrinsics_720.yml -vf "D:\HAND_Human_Human_Study\Kinect data sorted\Peanut Butter\7-14 3pm 2\frame_indices_peanut butter 3pm 7-14 2.json"
 ```
 
 
