@@ -11,12 +11,12 @@ from pathlib import Path
 
 # TODO Must change all the below to appropriate values
 
-KINECT_START = Path(r"D:\HAND_Human_Human_Study\Kinect data sorted\Peanut Butter\7-14 11am 3\record_start_time_11am_3_7_14.txt")
-KINECT_VIDEO = Path(r"D:\HAND_Human_Human_Study\Kinect data sorted\Peanut Butter\7-14 11am 3\output_11am_3_7_14.mkv")
-OPTI_CSV     = Path(r"D:\HAND_Human_Human_Study\Kinect data sorted\Peanut Butter\7-14 11am 3\peanut butter 11am 7-14 3.csv")
-OUTPUT_FOLDER= Path(r"D:\HAND_Human_Human_Study\Kinect data sorted\Peanut Butter\7-14 11am 3")
+KINECT_START = Path(r"D:\HAND_Human_Human_Study\Kinect data sorted\Peanut Butter\7-15 1.30pm 1\record_start_time_1.30am_1_7_15.txt")
+KINECT_VIDEO = Path(r"D:\HAND_Human_Human_Study\Kinect data sorted\Peanut Butter\7-15 1.30pm 1\output_1.30am_1_7_15.mkv")
+OPTI_CSV     = Path(r"D:\HAND_Human_Human_Study\Kinect data sorted\Peanut Butter\7-15 1.30pm 1\peanut butter 7-15 1.30 1.csv")
+OUTPUT_FOLDER= Path(r"D:\HAND_Human_Human_Study\Kinect data sorted\Peanut Butter\7-15 1.30pm 1")
 KINECT_OFFSET = 0  # must change to correct OFFSET, use k4aviewer to find this. However, since there is always a constant offset, this is not always necessary as long as your constant offset accounts for it
-CONSTANT_OFFSET = -1.22       # offset in seconds, this is not constant for all videos, but constant for only this video (just play with numbers until correct) 
+CONSTANT_OFFSET = -.5       # offset in seconds, this is not constant for all videos, but constant for only this video (just play with numbers until correct) 
 # For the data collected in our study, the more positive you go, you will be shifting the kinect video back (another way to think about is moving the optitrack video forward), if you go closer to negative or to negative, it will vice versa
 
 # The global variables below probably will not change
@@ -312,6 +312,7 @@ if __name__ == "__main__":
         kinect_frames = list(range(kinect_start_frame, kinect_start_frame + num_rows))
         df["Kinect Frame"] = kinect_frames
         df["kinect time (s)"] = [(f / KINECT_FPS) for f in kinect_frames]
+        
 
 
         # Step 7: Reorder columns

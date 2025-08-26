@@ -213,7 +213,7 @@ def main():
         kinect_frame_num = kinect_start_frame + args.skip_frames
 
         
-        while  optitrack_frame_num < optitrack_end_frame:
+        while  optitrack_frame_num < optitrack_end_frame or kinect_frame_num < kinect_end_frame:
             # Calculate the corresponding frame number for OptiTrack data
             print(f"(OptiTrack Frame: {optitrack_frame_num * 4}) (Kinect Frame: {kinect_frame_num}) ---\n")
 
