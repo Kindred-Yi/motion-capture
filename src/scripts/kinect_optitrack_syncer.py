@@ -16,7 +16,7 @@ KINECT_VIDEO = Path(r"D:\HAND_Human_Human_Study\Kinect data sorted\Peanut Butter
 OPTI_CSV     = Path(r"D:\HAND_Human_Human_Study\Kinect data sorted\Peanut Butter\7-10 16am 3\peanut butter 4pm 7-10 3.csv")
 OUTPUT_FOLDER= Path(r"D:\HAND_Human_Human_Study\Kinect data sorted\Peanut Butter\7-10 16am 3")
 KINECT_OFFSET = 200400  # must change to correct OFFSET, use k4aviewer to find this
-CONSTANT_OFFSET = -.29        # offset in seconds, this is not constant for all videos, but constant for only this video (just play with numbers until correct) 
+CONSTANT_OFFSET = -1        # offset in seconds, this is not constant for all videos, but constant for only this video (just play with numbers until correct) 
 # For the data collected in our study, the more positive you go, you will be shifting the kinect video bacck (another way to think about is moving the optitrack video forward), if you go closer to negative or to negative, it will vice versa
 
 # The global variables below probably will not change
@@ -232,7 +232,7 @@ if __name__ == "__main__":
 
     else:
         print("Kinect ends first Logic")
-        
+
         opti_end_delta_time = kinect_end_time - opti_start_time
         opti_end_frame = math.floor(opti_end_delta_time.total_seconds() * OPTI_FPS)
 

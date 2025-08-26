@@ -4,7 +4,7 @@ import os
 import sys
 import argparse
 import cv2
-import cv2.aruco as aruco
+# import cv2.aruco as aruco
 import time
 import json
 
@@ -161,19 +161,21 @@ def create_point_cloud(color_raw, depth_raw, camera_intrinsic, dist_coeffs):
 def main():
     parser = argparse.ArgumentParser(description='Animate point clouds and OptiTrack data frame by frame.')
     # MODIFIED: Changed from single files to folders
-    parser.add_argument('-c','--color_folder', dest='color_folder', required=True, help='Path to the folder containing color images.')
-    parser.add_argument('-d', '--depth_folder', dest='depth_folder', required=True, help='Path to the folder containing depth images.')
+    parser.add_argument('-rgb','--color_folder', dest='color_folder', required=True, help='Path to the folder containing color images.')
+    parser.add_argument('-depth', '--depth_folder', dest='depth_folder', required=True, help='Path to the folder containing depth images.')
     parser.add_argument('-o','--optitrack',dest='optitrack', required=True, help='Path to the OptiTrack CSV file.')
     parser.add_argument('-crc', '--camRigidcalib', dest='camRigidcalib', required=True, help='Transformation file from Camera to its Rigid Body.')
-    parser.add_argument('--cam_body_name', default='Kinect_cam', help='Name of the rigid body attached to the camera.')
-    parser.add_argument('--intrinsic', default='azure_kinect_intrinsics.yml', help='Camera intrinsic parameters file.')
+    parser.add_argument('-c', '--cam_body_name', dest='cam_body_name', default='Kinect_cam', help='Name of the rigid body attached to the camera.')
+    parser.add_argument('--intrinsics', default='azure_kinect_intrinsics.yml', help='Camera intrinsic parameters file.')
     # MODIFIED: Start frame is now an offset for OptiTrack data, end_frame is removed.
     parser.add_argument('-vf', '--video_frames', dest='video_frames', type=str, default=1, help='path to JSON file for start and end frames')
+    parser.add_argument('-s', '--skip_frames', dest='skip_frames', type=int, default=0, help='Number of initial kinect frames to skip.')
+    parser.add_argument('-p','--processed', dest='use_processed', action='store_true', help='using processed OptiTrack data at 30 FPS instead of raw 120 FPS')
 
     args = parser.parse_args()
 
     # --- Pre-load data that doesn't change per frame ---
-    camera_intrinsic, camera_matrix_cv, dist_coeffs_cv = load_azure_kinect_intrinsics(args.intrinsic)
+    camera_intrinsic, camera_matrix_cv, dist_coeffs_cv = load_azure_kinect_intrinsics(args.intrinsics)
     if camera_intrinsic is None:
         sys.exit("Error: Could not load camera intrinsics. Exiting.")
 
@@ -201,13 +203,20 @@ def main():
 
     try:
         # --- Main Processing Loop ---
-        optitrack_frame_num = frame_data["optitrack_start_frame"]
+        optitrack_start_frame = frame_data["optitrack_start_frame"]
         optitrack_end_frame = frame_data["optitrack_end_frame"]
-        kinect_frame_num = frame_data["kinect_start_frame"]
+        kinect_start_frame = frame_data["kinect_start_frame"]
         kinect_end_frame = frame_data["kinect_end_frame"]
         counter = 0
-
-        frame_ratio = OPTI_FPS / KINECT_FPS
+        if args.use_processed:
+            frame_ratio = 1
+            optitrack_frame_num = optitrack_start_frame + args.skip_frames
+            kinect_frame_num = kinect_start_frame + args.skip_frames
+        else:
+            frame_ratio = OPTI_FPS / KINECT_FPS
+            optitrack_frame_num = optitrack_start_frame + int(args.skip_frames * frame_ratio)
+            kinect_frame_num = kinect_start_frame + args.skip_frames
+        
         while  optitrack_frame_num < optitrack_end_frame:
             # Calculate the corresponding frame number for OptiTrack data
             print(f"(OptiTrack Frame: {optitrack_frame_num}) (Kinect Frame: {kinect_frame_num}) ---\n")

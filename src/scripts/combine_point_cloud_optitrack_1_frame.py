@@ -225,8 +225,8 @@ def create_point_cloud(color_raw, depth_raw, camera_intrinsic, dist_coeffs):
 
 def main():
     parser = argparse.ArgumentParser(description='Convert RGB/D images to a point cloud and transform it into the OptiTrack world frame.')
-    parser.add_argument('--rgb', required=True, help='Path to RGB image')
-    parser.add_argument('--depth', required=True, help='Path to depth image')
+    parser.add_argument('-rgb', required=True, help='Path to RGB image')
+    parser.add_argument('-depth', required=True, help='Path to depth image')
     parser.add_argument('-o','--optitrack', dest='optitrack', required=True, help='Path to the CSV file that has the OptiTrack data')
     parser.add_argument('-crc', '--camRigidcalib', dest='camRigidcalib', default = 'Kinect_cam', help='Transformation file from Camera to its Rigid Body (T_rigid_cam)')
     parser.add_argument('-c','--cam_body_name', dest='camBodyName', required=True, help='The name of the rigid body attached to the camera in the OptiTrack data')
