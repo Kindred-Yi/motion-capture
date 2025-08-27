@@ -16,7 +16,7 @@ KINECT_VIDEO = Path(r"D:\HAND_Human_Human_Study\Kinect data sorted\Pasta\7-14 11
 OPTI_CSV     = Path(r"D:\HAND_Human_Human_Study\Kinect data sorted\Pasta\7-14 11am 2\pasta 11am 7-14 2.csv")
 OUTPUT_FOLDER= Path(r"D:\HAND_Human_Human_Study\Kinect data sorted\Pasta\7-14 11am 2")
 KINECT_OFFSET = 0  # must change to correct OFFSET, use k4aviewer to find this. However, since there is always a constant offset, this is not always necessary as long as your constant offset accounts for it
-CONSTANT_OFFSET = -1.615       # offset in seconds, this is not constant for all videos, but constant for only this video (just play with numbers until correct) 
+CONSTANT_OFFSET = -2       # offset in seconds, this is not constant for all videos, but constant for only this video (just play with numbers until correct) 
 # For the data collected in our study, the more positive you go, you will be shifting the kinect video back (another way to think about is moving the optitrack video forward), if you go closer to negative or to negative, it will vice versa
 
 # The global variables below probably will not change
@@ -238,6 +238,11 @@ if __name__ == "__main__":
 
     print("kinect end frame:", kinect_end_frame)
     print("optitrack end frame:", opti_end_frame)
+
+    # check to make sure start and end frames within bouds
+    if kinect_start_frame < 0 or kinect_start_frame > kinect_total_frames or opti_start_frame < 0 or opti_start_frame > opti_total_frames:
+        print("Error: Atleast one of the calculated start or end frames are out of bounds. Please check the offsets and try again")
+        exit(1)
 
     # 9. Save start/end frames to JSON
     frame_data = {
