@@ -11,12 +11,12 @@ from pathlib import Path
 
 # TODO Must change all the below to appropriate values
 
-KINECT_START = Path(r"D:\HAND_Human_Human_Study\Kinect data sorted\Peanut Butter\7-15 1.30pm 1\record_start_time_1.30am_1_7_15.txt")
-KINECT_VIDEO = Path(r"D:\HAND_Human_Human_Study\Kinect data sorted\Peanut Butter\7-15 1.30pm 1\output_1.30am_1_7_15.mkv")
-OPTI_CSV     = Path(r"D:\HAND_Human_Human_Study\Kinect data sorted\Peanut Butter\7-15 1.30pm 1\peanut butter 7-15 1.30 1.csv")
-OUTPUT_FOLDER= Path(r"D:\HAND_Human_Human_Study\Kinect data sorted\Peanut Butter\7-15 1.30pm 1")
+KINECT_START = Path(r"D:\HAND_Human_Human_Study\Kinect data sorted\Pasta\7-14 11am 2\record_start_time_11am_2_7_14.txt")
+KINECT_VIDEO = Path(r"D:\HAND_Human_Human_Study\Kinect data sorted\Pasta\7-14 11am 2\output_11am_2_7_14.mkv")
+OPTI_CSV     = Path(r"D:\HAND_Human_Human_Study\Kinect data sorted\Pasta\7-14 11am 2\pasta 11am 7-14 2.csv")
+OUTPUT_FOLDER= Path(r"D:\HAND_Human_Human_Study\Kinect data sorted\Pasta\7-14 11am 2")
 KINECT_OFFSET = 0  # must change to correct OFFSET, use k4aviewer to find this. However, since there is always a constant offset, this is not always necessary as long as your constant offset accounts for it
-CONSTANT_OFFSET = -.5       # offset in seconds, this is not constant for all videos, but constant for only this video (just play with numbers until correct) 
+CONSTANT_OFFSET = -1.615       # offset in seconds, this is not constant for all videos, but constant for only this video (just play with numbers until correct) 
 # For the data collected in our study, the more positive you go, you will be shifting the kinect video back (another way to think about is moving the optitrack video forward), if you go closer to negative or to negative, it will vice versa
 
 # The global variables below probably will not change
@@ -113,8 +113,8 @@ def compute_frame_num(total_seconds, kinect_start_frame, opti_start_frame):
         print("The given Kinect Video time is before there are optitrack frames. Please provide a minute and second pair that is greater than", kinect_start_time * KINECT_FPS, "seconds")
         exit(1)
 
-    kinect_offset_frames = kinect_frame - kinect_start_frame
-    opti_frame = opti_start_frame + kinect_offset_frames / KINECT_FPS * OPTI_FPS
+    kinect_offset_frames = kinect_frame - kinect_start_frame # figures out how many frames have passed since kinect_start_frame, which could be non zero depending on which video started first
+    opti_frame = opti_start_frame + kinect_offset_frames / KINECT_FPS * OPTI_FPS # use the number of frames passed from first kinect synced frame to figure out how many optitrack frames have passed
 
     return kinect_frame, int(opti_frame)
 
@@ -187,7 +187,7 @@ if __name__ == "__main__":
 
     # 3. Compute clock offset
     initial_start_offset = kinect_start_time - opti_start_time
-    print(initial_start_offset.total_seconds())
+    print("offset: ", initial_start_offset.total_seconds())
 
     # 4) checks which video started first and then adjusts start times accordingly
     kinect_start_frame = 0    
